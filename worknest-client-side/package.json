@@ -25,6 +25,7 @@
     "recharts": "^3.6.0",
     "sweetalert2": "^11.26.10",
     "recharts": "^3.6.0",
+    "recharts": "^3.5.1",
     "tailwindcss": "^4.1.17"
   },
   "devDependencies": {
