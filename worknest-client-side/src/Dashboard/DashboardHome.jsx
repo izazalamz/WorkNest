@@ -15,9 +15,11 @@ import {
   Filter,
   Eye,
   Edit,
+  Bell,
 } from "lucide-react";
 import { Link } from "react-router";
 import useUserRole from "../hooks/useUserRole";
+import useNotifications from "../hooks/useNotifications";
 import { AuthContext } from "../contexts/AuthContext";
 import axios from "axios";
 
@@ -29,6 +31,7 @@ const DashboardHome = () => {
   const userRole = role;
   const { user } = use(AuthContext);
   const uid = user?.uid;
+  const { notifications, markAsRead, showNotification } = useNotifications();
 
   useEffect(() => {
     // Determine time of day for greeting
@@ -423,6 +426,62 @@ const DashboardHome = () => {
 
         {/* Right Column - Activity & Team */}
         <div className="space-y-8">
+          {/* Notifications */}
+          <div className="bg-card border border-border rounded-xl p-6">
+            <div className="flex items-center justify-between mb-6">
+              <h2 className="text-xl font-semibold text-foreground">
+                Notifications
+              </h2>
+              <Bell className="w-5 h-5 text-muted-foreground" />
+            </div>
+            <div className="space-y-4">
+              {notifications.slice(0, 4).map((notification, index) => (
+                <div
+                  key={notification._id}
+                  className={`flex items-start gap-3 p-3 rounded-lg hover:bg-muted/50 transition-colors ${
+                    !notification.isRead ? "bg-primary/5 border-l-4 border-primary" : ""
+                  }`}
+                >
+                  <div
+                    className={`p-2 rounded-full ${
+                      notification.type === "booking"
+                        ? "bg-primary/10 text-primary"
+                        : notification.type === "reminder"
+                        ? "bg-secondary/10 text-secondary"
+                        : notification.type === "alert"
+                        ? "bg-error/10 text-error"
+                        : "bg-accent/10 text-accent"
+                    }`}
+                  >
+                    <Bell className="w-4 h-4" />
+                  </div>
+                  <div className="flex-1">
+                    <p className="text-sm font-medium text-foreground">
+                      {notification.title}
+                    </p>
+                    <p className="text-sm text-muted-foreground mt-1">
+                      {notification.message}
+                    </p>
+                    <p className="text-xs text-muted-foreground mt-1">
+                      {new Date(notification.createdAt).toLocaleDateString()}
+                    </p>
+                  </div>
+                  {!notification.isRead && (
+                    <button
+                      onClick={() => markAsRead(notification._id)}
+                      className="text-xs text-primary hover:text-primary/80"
+                    >
+                      Mark as read
+                    </button>
+                  )}
+                </div>
+              ))}
+            </div>
+            <button className="w-full mt-6 py-2.5 text-sm font-medium text-primary hover:text-primary/80 transition-colors border border-primary/20 rounded-lg hover:bg-primary/5">
+              View All Notifications
+            </button>
+          </div>
+
           {/* Recent Activity */}
           <div className="bg-card border border-border rounded-xl p-6">
             <div className="flex items-center justify-between mb-6">

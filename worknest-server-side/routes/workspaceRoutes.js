@@ -5,7 +5,6 @@ const {
   getAllWorkspaces,
 } = require("../controllers/workspaceController");
 
-// post new workspace to DB
 router.post("/workspace", createWorkspace);
 
 // get all workspaces
