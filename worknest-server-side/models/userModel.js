@@ -1,45 +1,38 @@
-const { Schema, model } = require("mongoose");
+const mongoose = require("mongoose");
 
-const UserSchema = new Schema(
+const userSchema = new mongoose.Schema(
   {
-    uid: {
-      type: String,
-      required: true,
-      maxlength: 50,
-    },
-    name: {
-      type: String,
-      required: true,
-      maxlength: 50,
-    },
-    companyName: {
-      type: String,
-      required: true,
-      maxlength: 30,
-    },
+    // Firebase authentication UID
+    uid: { type: String, required: true, unique: true, trim: true },
 
+    // Primary user email
     email: {
       type: String,
       required: true,
-      maxlength: 50,
+      unique: true,
+      lowercase: true,
+      trim: true,
     },
-    role: {
-      type: String,
-      required: true,
-      maxlength: 30,
-    },
-    profileCompleted: {
-      type: Boolean,
-      default: false,
-    },
-    createdAt: {
-      type: Date,
-      default: Date.now,
-    },
+
+    // Full name shown in the app
+    name: { type: String, required: true, trim: true },
+
+    // Optional company metadata
+    companyName: { type: String, trim: true },
+    department: { type: String, trim: true },
+
+    // Access level
+    role: { type: String, enum: ["admin", "employee"], default: "employee" },
+
+    // Soft disable without deleting data
+    isActive: { type: Boolean, default: true },
   },
-  { versionKey: false }
+  { timestamps: true }
 );
 
-const UserModel = model("user", UserSchema);
+// Indexes for lookups and permissions
+userSchema.index({ email: 1 }, { unique: true });
+userSchema.index({ uid: 1 }, { unique: true });
+userSchema.index({ role: 1, isActive: 1 });
 
-module.exports = UserModel;
+module.exports = mongoose.model("User", userSchema);

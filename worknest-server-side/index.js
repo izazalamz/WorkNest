@@ -5,6 +5,7 @@ const app = express();
 const connectDB = require("./config/db");
 const userRoutes = require("./routes/userRoutes");
 const workspaceRoutes = require("./routes/workspaceRoutes");
+const analyticsRoutes = require("./routes/analyticsRoutes");
 const notificationRoutes = require("./routes/notificationRoutes");
 const port = process.env.PORT || 3000;
 
@@ -24,6 +25,8 @@ app.use(userRoutes);
 // all routes for wrokspace -
 app.use("/dashboard", workspaceRoutes); // api endpoint --> /dashboard/routes
 
+// all routes for analytics
+app.use("/dashboard", analyticsRoutes);
 // all routes for notifications
 app.use("/api/notifications", notificationRoutes);
 
