@@ -16,9 +16,12 @@ import {
   Bell,
   ChevronDown,
   HelpCircle,
+  PlusSquare,
 } from "lucide-react";
 import { AuthContext } from "../contexts/AuthContext";
 import useUserRole from "../hooks/useUserRole";
+import Loading from "../components/Loading";
+import axios from "axios";
 
 const DashboardLayout = () => {
   const [sidebarOpen, setSidebarOpen] = useState(false);
@@ -26,6 +29,8 @@ const DashboardLayout = () => {
   const navigate = useNavigate();
   const { user, signOutUser, loading } = useContext(AuthContext);
   const { role } = useUserRole();
+  const [userData, setUserData] = useState({});
+  const [error, setError] = useState("");
 
   const toggleSidebar = () => setSidebarOpen(!sidebarOpen);
 
@@ -55,22 +60,27 @@ const DashboardLayout = () => {
 
   // Mock user data - replace with actual data from your context
 
-  const userData = {
-    name: user?.displayName || "Alex Johnson",
-    email: user?.email || "alex@company.com",
-    role: role,
-    avatar: user?.photoURL || null,
-  };
+  // Fetch user data
+  useEffect(() => {
+    if (!user?.uid) return;
+
+    axios
+      .get(`http://localhost:3000/users/${user.uid}`)
+      .then((res) => {
+        const u = res.data.users;
+        setUserData({
+          name: u.name || "",
+          companyName: u.companyName || "",
+          department: u.department || "",
+          role: u.role || "employee",
+          photoURL: u.photoURL || "",
+        });
+      })
+      .catch(() => setError("Failed to load profile"));
+  }, [user]);
 
   if (loading || !user) {
-    return (
-      <div className="min-h-screen flex items-center justify-center bg-background">
-        <div className="text-center">
-          <div className="w-16 h-16 border-4 border-primary border-t-transparent rounded-full animate-spin mx-auto mb-4"></div>
-          <p className="text-foreground">Loading dashboard...</p>
-        </div>
-      </div>
-    );
+    return <Loading />;
   }
 
   return (
@@ -254,9 +264,20 @@ const DashboardLayout = () => {
 
             {role === "admin" && (
               <>
+                <NavLink to="/dashboard/allusers" className={linkClasses}>
+                  <Users size={20} />
+                  <span className="font-medium">All Users</span>
+                </NavLink>
                 <NavLink to="/dashboard/add-workspace" className={linkClasses}>
-                  <Calendar size={20} />
+                  <PlusSquare size={20} />
                   <span className="font-medium">Add Workspace</span>
+                </NavLink>
+                <NavLink
+                  to="/dashboard/manage-workspace"
+                  className={linkClasses}
+                >
+                  <Settings size={20} />
+                  <span className="font-medium">Manage Workspace</span>
                 </NavLink>
                 <NavLink to="/dashboard/analytics" className={linkClasses}>
                   <BarChart3 size={20} />

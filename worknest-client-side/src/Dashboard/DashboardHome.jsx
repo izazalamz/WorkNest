@@ -32,7 +32,7 @@ const DashboardHome = () => {
   const userRole = role;
   const { user } = use(AuthContext);
   const uid = user?.uid;
-  const { notifications, markAsRead, showNotification } = useNotifications();
+  // const { notifications, markAsRead, showNotification } = useNotifications();
 
   useEffect(() => {
     // Determine time of day for greeting
@@ -421,7 +421,7 @@ const DashboardHome = () => {
         {/* Right Column - Activity & Team */}
         <div className="space-y-8">
           {/* Notifications */}
-          <div className="bg-card border border-border rounded-xl p-6">
+          {/* <div className="bg-card border border-border rounded-xl p-6">
             <div className="flex items-center justify-between mb-6">
               <h2 className="text-xl font-semibold text-foreground">
                 Notifications
@@ -474,7 +474,7 @@ const DashboardHome = () => {
             <button className="w-full mt-6 py-2.5 text-sm font-medium text-primary hover:text-primary/80 transition-colors border border-primary/20 rounded-lg hover:bg-primary/5">
               View All Notifications
             </button>
-          </div>
+          </div> */}
 
           {/* Recent Activity */}
           <div className="bg-card border border-border rounded-xl p-6">

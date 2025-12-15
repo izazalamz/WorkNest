@@ -15,9 +15,18 @@ const userSchema = new mongoose.Schema(
     },
 
     // Full name shown in the app
-    name: { type: String, required: true, trim: true },
+    name: { type: String, trim: true },
 
-    // Optional company metadata
+    profileCompleted: {
+      type: Boolean,
+      default: false,
+    },
+
+    photoURL: {
+      type: String,
+    },
+
+    // company metadata
     companyName: { type: String, trim: true },
     department: { type: String, trim: true },
 

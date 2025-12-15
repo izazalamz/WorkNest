@@ -14,14 +14,12 @@ const CompleteProfile = () => {
   const [formData, setFormData] = useState({
     name: "",
     companyName: "",
+    department: "",
     role: "employee",
   });
 
   const handleChange = (field, value) => {
-    setFormData((prev) => ({
-      ...prev,
-      [field]: value,
-    }));
+    setFormData((prev) => ({ ...prev, [field]: value }));
     if (error) setError("");
   };
 
@@ -29,7 +27,7 @@ const CompleteProfile = () => {
     e.preventDefault();
 
     if (!formData.name || !formData.companyName) {
-      setError("Please complete all required fields");
+      setError("Please fill in all required fields");
       return;
     }
 
@@ -38,10 +36,11 @@ const CompleteProfile = () => {
     try {
       const payload = {
         uid: user.uid,
-        name: formData.name,
         email: user.email,
+        name: formData.name,
         companyName: formData.companyName,
-        role: formData.role,
+        department: formData.department,
+        role: "employee",
         profileCompleted: true,
       };
 
@@ -57,33 +56,35 @@ const CompleteProfile = () => {
   };
 
   return (
-    <section className="min-h-screen flex items-center justify-center bg-background px-4">
-      <div className="w-full max-w-lg bg-card border border-border rounded-xl p-8 shadow-lg">
-        <h1 className="text-3xl font-bold text-foreground mb-2">
-          Complete Your Profile
-        </h1>
-        <p className="text-muted-foreground mb-8">
-          Please complete your profile to access your WorkNest dashboard.
-        </p>
+    <section className="min-h-screen flex items-center justify-center bg-gradient-to-br from-primary/5 via-background to-secondary/5 px-4">
+      <div className="w-full max-w-lg rounded-3xl border border-border bg-card p-8 shadow-xl">
+        <header className="mb-8 text-center">
+          <h1 className="text-3xl font-bold text-foreground">
+            Complete Your Profile
+          </h1>
+          <p className="mt-2 text-muted-foreground">
+            This information helps us personalize your WorkNest experience.
+          </p>
+        </header>
 
         {error && (
-          <div className="mb-6 p-4 bg-error/10 border border-error/20 rounded-lg text-error text-sm">
+          <div className="mb-6 rounded-lg border border-error/30 bg-error/10 p-3 text-sm text-error">
             {error}
           </div>
         )}
 
         <form onSubmit={handleSubmit} className="space-y-5">
-          {/* Name */}
+          {/* Full Name */}
           <div>
-            <label className="text-sm font-medium text-foreground mb-1 block">
-              Full Name
+            <label className="block text-sm font-medium mb-1">
+              Full Name *
             </label>
             <div className="relative">
-              <User className="absolute left-4 top-1/2 -translate-y-1/2 text-muted-foreground w-5 h-5" />
+              <User className="absolute left-4 top-1/2 -translate-y-1/2 w-5 h-5 text-muted-foreground" />
               <input
                 type="text"
+                className="w-full h-14 pl-12 pr-4 rounded-xl border border-border bg-background focus:ring-2 focus:ring-primary/40 outline-none"
                 placeholder="Your full name"
-                className="w-full pl-12 pr-4 h-14 rounded-lg bg-background border border-border focus:ring-2 focus:ring-primary/50 outline-none"
                 value={formData.name}
                 onChange={(e) => handleChange("name", e.target.value)}
                 required
@@ -91,17 +92,17 @@ const CompleteProfile = () => {
             </div>
           </div>
 
-          {/* Company */}
+          {/* Company Name */}
           <div>
-            <label className="text-sm font-medium text-foreground mb-1 block">
-              Company Name
+            <label className="block text-sm font-medium mb-1">
+              Company Name *
             </label>
             <div className="relative">
-              <Building2 className="absolute left-4 top-1/2 -translate-y-1/2 text-muted-foreground w-5 h-5" />
+              <Building2 className="absolute left-4 top-1/2 -translate-y-1/2 w-5 h-5 text-muted-foreground" />
               <input
                 type="text"
-                placeholder="Your company name"
-                className="w-full pl-12 pr-4 h-14 rounded-lg bg-background border border-border focus:ring-2 focus:ring-primary/50 outline-none"
+                className="w-full h-14 pl-12 pr-4 rounded-xl border border-border bg-background focus:ring-2 focus:ring-primary/40 outline-none"
+                placeholder="Your company"
                 value={formData.companyName}
                 onChange={(e) => handleChange("companyName", e.target.value)}
                 required
@@ -109,33 +110,29 @@ const CompleteProfile = () => {
             </div>
           </div>
 
-          {/* Role */}
+          {/* Department (optional) */}
           <div>
-            <label className="text-sm font-medium text-foreground mb-1 block">
-              Role
+            <label className="block text-sm font-medium mb-1">
+              Department (optional)
             </label>
-            <div className="relative">
-              <Briefcase className="absolute left-4 top-1/2 -translate-y-1/2 text-muted-foreground w-5 h-5" />
-              <select
-                className="w-full pl-12 pr-4 h-14 rounded-lg bg-background border border-border focus:ring-2 focus:ring-primary/50 outline-none"
-                value={formData.role}
-                onChange={(e) => handleChange("role", e.target.value)}
-              >
-                <option value="employee">Employee</option>
-                <option value="admin">Admin</option>
-              </select>
-            </div>
+            <input
+              type="text"
+              className="w-full h-14 px-4 rounded-xl border border-border bg-background focus:ring-2 focus:ring-primary/40 outline-none"
+              placeholder="Engineering, HR, Design..."
+              value={formData.department}
+              onChange={(e) => handleChange("department", e.target.value)}
+            />
           </div>
 
           {/* Submit */}
           <button
             type="submit"
             disabled={loading}
-            className="w-full h-14 rounded-lg bg-primary text-primary-foreground font-semibold hover:bg-primary/90 transition-colors flex items-center justify-center"
+            className="w-full h-14 rounded-xl bg-primary text-primary-foreground font-semibold shadow-lg hover:bg-primary/90 transition flex items-center justify-center"
           >
             {loading ? (
               <>
-                <div className="w-5 h-5 border-2 border-white border-t-transparent rounded-full animate-spin mr-2"></div>
+                <span className="w-5 h-5 mr-2 rounded-full border-2 border-white border-t-transparent animate-spin" />
                 Saving...
               </>
             ) : (

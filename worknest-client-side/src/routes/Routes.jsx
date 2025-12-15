@@ -15,6 +15,8 @@ import Analytics from "../Dashboard/Dashboardcomponents/Analytics";
 import RequireProfileCompleted from "../components/RequireProfileCompleted";
 import CompleteProfile from "../components/CompleteProfile";
 import About from "../pages/About";
+import AllUsers from "../Dashboard/Dashboardcomponents/AllUsers";
+import ManageWorkspace from "../Dashboard/Dashboardcomponents/ManageWorkspace";
 
 export const router = createBrowserRouter([
   {
@@ -55,13 +57,16 @@ export const router = createBrowserRouter([
     children: [
       {
         index: true,
-
         Component: DashboardHome,
       },
 
       {
         path: "/dashboard/add-workspace",
         Component: AddWorkspace,
+      },
+      {
+        path: "/dashboard/manage-workspace",
+        Component: ManageWorkspace,
       },
       {
         path: "/dashboard/desk-booking",
@@ -74,6 +79,10 @@ export const router = createBrowserRouter([
       {
         path: "/dashboard/my-bookings",
         Component: MyBookings,
+      },
+      {
+        path: "/dashboard/allusers",
+        Component: AllUsers,
       },
       {
         path: "/dashboard/analytics",

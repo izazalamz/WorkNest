@@ -3,6 +3,7 @@ import { use, useEffect, useState } from "react";
 import { AuthContext } from "../contexts/AuthContext";
 import Loading from "./Loading";
 import { Navigate } from "react-router";
+import BlockedProfile from "./BlockedProfile";
 
 const RequireProfileCompleted = ({ children }) => {
   const { user } = use(AuthContext);
@@ -17,9 +18,13 @@ const RequireProfileCompleted = ({ children }) => {
   }, [user]);
 
   if (!profile) return <Loading />;
+  console.log("this is profile", profile);
 
   if (!profile.profileCompleted) {
     return <Navigate to="/complete-profile" />;
+  }
+  if (!profile.isActive) {
+    return <BlockedProfile />;
   }
 
   return children;

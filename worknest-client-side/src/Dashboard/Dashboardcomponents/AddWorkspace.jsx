@@ -1,431 +1,254 @@
 import { useState } from "react";
-import axios from "axios";
 import {
-  BadgePlus,
-  CalendarClock,
-  Check,
-  Monitor,
+  Building2,
+  Layers,
+  MapPin,
+  Users,
+  Wrench,
   Plus,
-  Save,
   X,
 } from "lucide-react";
-
-const initialWorkspace = {
-  name: "",
-  type: "desk",
-  location: "",
-  capacity: "",
-  amenities: [],
-  status: "available",
-  description: "",
-  isActive: true,
-};
-
-const workspaceTypes = [
-  {
-    value: "desk",
-    label: "Desk",
-    description: "Best for individual work",
-    icon: Monitor,
-  },
-  {
-    value: "meeting-room",
-    label: "Meeting Room",
-    description: "Ideal for group collaboration",
-    icon: CalendarClock,
-  },
-];
-
-const statusOptions = [
-  { value: "available", label: "Available" },
-  { value: "occupied", label: "Occupied" },
-  { value: "maintenance", label: "Maintenance" },
-];
+import axios from "axios";
+import { useNavigate } from "react-router";
 
 const AddWorkspace = () => {
-  const [formData, setFormData] = useState(initialWorkspace);
-  const [amenityDraft, setAmenityDraft] = useState("");
-  const [isSubmitting, setIsSubmitting] = useState(false);
-  const [feedback, setFeedback] = useState({ type: null, message: "" });
+  const navigate = useNavigate();
+  const [loading, setLoading] = useState(false);
+  const [error, setError] = useState("");
 
-  const updateField = (key, value) => {
-    setFormData((prev) => {
-      if (key === "type" && value === "desk") {
-        return { ...prev, type: value, capacity: "" };
-      }
-      return { ...prev, [key]: value };
-    });
+  const [amenityInput, setAmenityInput] = useState("");
+
+  const [formData, setFormData] = useState({
+    name: "",
+    type: "desk",
+    capacity: 1,
+    status: "active",
+    amenities: [],
+    location: {
+      building: "",
+      floor: "",
+      zone: "",
+      description: "",
+    },
+  });
+
+  const handleChange = (field, value) => {
+    setFormData((prev) => ({ ...prev, [field]: value }));
   };
 
-  const handleAmenityAdd = () => {
-    const trimmedAmenity = amenityDraft.trim();
-    if (!trimmedAmenity || formData.amenities.includes(trimmedAmenity)) return;
+  const handleLocationChange = (field, value) => {
     setFormData((prev) => ({
       ...prev,
-      amenities: [...prev.amenities, trimmedAmenity],
+      location: { ...prev.location, [field]: value },
     }));
-    setAmenityDraft("");
   };
 
-  const handleAmenityRemove = (amenity) => {
+  const addAmenity = () => {
+    if (!amenityInput.trim()) return;
     setFormData((prev) => ({
       ...prev,
-      amenities: prev.amenities.filter((item) => item !== amenity),
+      amenities: [...prev.amenities, amenityInput.trim()],
+    }));
+    setAmenityInput("");
+  };
+
+  const removeAmenity = (index) => {
+    setFormData((prev) => ({
+      ...prev,
+      amenities: prev.amenities.filter((_, i) => i !== index),
     }));
   };
 
-  const handleSubmit = async (event) => {
-    event.preventDefault();
+  const handleSubmit = async (e) => {
+    e.preventDefault();
+    setError("");
 
-    const requiresCapacity = formData.type === "meeting-room";
-    const capacityValue = Number(formData.capacity);
-    if (
-      requiresCapacity &&
-      (!formData.capacity || Number.isNaN(capacityValue) || capacityValue <= 0)
-    ) {
-      setFeedback({
-        type: "error",
-        message: "Meeting rooms need a capacity above zero.",
-      });
+    if (!formData.name || !formData.type) {
+      setError("Workspace name and type are required.");
       return;
     }
 
-    setIsSubmitting(true);
-    setFeedback({ type: null, message: "" });
-
-    const workspace = {
-      name: formData.name.trim(),
-      type: formData.type,
-      location: formData.location.trim(),
-      amenities: formData.amenities,
-      status: formData.status,
-      description: formData.description.trim(),
-      isActive: formData.isActive,
-    };
-
-    if (formData.type === "meeting-room") {
-      workspace.capacity = capacityValue;
-    }
-
+    setLoading(true);
     try {
-      console.log("this is workspace", workspace);
-      const response = await axios.post(
-        "http://localhost:3000/dashboard/workspace",
-        workspace
-      );
-
-      setFeedback({
-        type: "success",
-        message: "Workspace saved successfully.",
-      });
-      setFormData(initialWorkspace);
-      setAmenityDraft("");
-      console.info("Workspace response", response.data);
-    } catch (error) {
-      console.error("Failed to create workspace", error);
-      setFeedback({
-        type: "error",
-        message: "Unable to save workspace right now. Please retry.",
-      });
+      await axios.post("http://localhost:3000/dashboard/workspace", formData);
+      navigate("/dashboard");
+    } catch (err) {
+      console.error(err);
+      setError("Failed to create workspace. Please try again.");
     } finally {
-      setIsSubmitting(false);
+      setLoading(false);
     }
   };
 
   return (
-    <div className="min-h-full bg-white">
-      <div className="mx-auto max-w-5xl px-4 py-8 sm:px-6 lg:px-8">
-        <header className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
-          <div>
-            <div className="flex items-center gap-2 text-sm font-medium text-primary">
-              <BadgePlus className="h-4 w-4" />
-              New workspace
-            </div>
-            <h1 className="mt-2 text-3xl font-semibold text-slate-900">
-              Add workspace details
-            </h1>
-            <p className="text-sm text-slate-500">
-              Capture the essentials so teammates can find and reserve the right
-              spot easily.
-            </p>
-          </div>
-          <div className="flex gap-2">
-            <button
-              type="button"
-              onClick={() => {
-                setFormData(initialWorkspace);
-                setAmenityDraft("");
-                setFeedback({ type: null, message: "" });
-              }}
-              className="inline-flex items-center gap-2 rounded-xl border border-slate-200 px-4 py-2 text-sm font-medium text-slate-600 transition hover:border-slate-300 hover:bg-slate-50"
-            >
-              <X className="h-4 w-4" />
-              Reset
-            </button>
-            <button
-              form="add-workspace"
-              type="submit"
-              disabled={isSubmitting}
-              className="inline-flex items-center gap-2 rounded-xl bg-slate-900 px-5 py-2 text-sm font-semibold text-white transition hover:bg-slate-800 disabled:cursor-not-allowed disabled:bg-slate-700"
-            >
-              <Save className="h-4 w-4" />
-              {isSubmitting ? "Saving..." : "Save workspace"}
-            </button>
-          </div>
-        </header>
+    <section className="max-w-4xl mx-auto px-4 py-10">
+      <div className="bg-card outline-none rounded-2xl p-8 shadow-lg">
+        <h1 className="text-3xl font-bold text-foreground mb-2">
+          Add Workspace
+        </h1>
+        <p className="text-muted-foreground mb-8">
+          Create a new desk or meeting room for your office.
+        </p>
 
-        {feedback.message && (
-          <div
-            className={`mt-6 rounded-2xl border px-4 py-3 text-sm ${
-              feedback.type === "success"
-                ? "border-emerald-200 bg-emerald-50 text-emerald-700"
-                : "border-rose-200 bg-rose-50 text-rose-700"
-            }`}
-          >
-            {feedback.message}
+        {error && (
+          <div className="mb-6 p-4 bg-error/10 border border-error/20 rounded-lg text-error text-sm">
+            {error}
           </div>
         )}
 
-        <form
-          id="add-workspace"
-          onSubmit={handleSubmit}
-          className="mt-10 grid gap-6 lg:grid-cols-[1.4fr_1fr]"
-        >
-          <section className="space-y-6 rounded-3xl border border-slate-200 bg-white p-6 shadow-sm">
+        <form onSubmit={handleSubmit} className="space-y-8">
+          {/* Basic Info */}
+          <div className="grid md:grid-cols-2 gap-6">
             <div>
-              <label className="text-sm font-medium text-slate-700">
-                Workspace name
+              <label className="text-sm font-medium mb-1 block">
+                Workspace Name
               </label>
-              <input
-                required
-                value={formData.name}
-                onChange={(event) => updateField("name", event.target.value)}
-                placeholder="e.g. Desk B-205"
-                className="mt-2 w-full rounded-xl border border-slate-200 px-4 py-2.5 text-sm text-slate-900 transition focus:border-indigo-500 focus:outline-none focus:ring-2 focus:ring-indigo-500/10"
-              />
-            </div>
-
-            <div>
-              <label className="text-sm font-medium text-slate-700">
-                Workspace type
-              </label>
-              <div className="mt-3 grid gap-3 sm:grid-cols-2">
-                {workspaceTypes.map(
-                  ({ value, label, description, icon: Icon }) => {
-                    const isActive = formData.type === value;
-                    return (
-                      <button
-                        key={value}
-                        type="button"
-                        onClick={() => updateField("type", value)}
-                        className={`flex items-start gap-3 rounded-2xl border px-4 py-3 text-left transition ${
-                          isActive
-                            ? "border-indigo-500 bg-indigo-50 text-indigo-600"
-                            : "border-slate-200 hover:border-slate-300"
-                        }`}
-                      >
-                        <span
-                          className={`rounded-xl p-3 ${
-                            isActive ? "bg-white/70" : "bg-slate-100"
-                          }`}
-                        >
-                          <Icon
-                            className={`h-5 w-5 ${
-                              isActive ? "text-indigo-600" : "text-slate-500"
-                            }`}
-                          />
-                        </span>
-                        <span>
-                          <span className="block text-sm font-semibold">
-                            {label}
-                          </span>
-                          <span
-                            className={`mt-1 block text-xs ${
-                              isActive ? "text-indigo-600/80" : "text-slate-500"
-                            }`}
-                          >
-                            {description}
-                          </span>
-                        </span>
-                        {isActive && (
-                          <Check className="ml-auto h-4 w-4 text-indigo-600" />
-                        )}
-                      </button>
-                    );
-                  }
-                )}
-              </div>
-            </div>
-
-            <div>
-              <label className="text-sm font-medium text-slate-700">
-                Location
-              </label>
-              <input
-                required
-                value={formData.location}
-                onChange={(event) =>
-                  updateField("location", event.target.value)
-                }
-                placeholder="e.g. Floor 2, Zone B"
-                className="mt-2 w-full rounded-xl border border-slate-200 px-4 py-2.5 text-sm text-slate-900 transition focus:border-indigo-500 focus:outline-none focus:ring-2 focus:ring-indigo-500/10"
-              />
-            </div>
-
-            {formData.type === "meeting-room" && (
-              <div>
-                <label className="text-sm font-medium text-slate-700">
-                  Capacity
-                </label>
+              <div className="relative">
+                <Building2 className="absolute left-4 top-1/2 -translate-y-1/2 text-muted-foreground w-5 h-5" />
                 <input
-                  type="number"
-                  min={1}
+                  className="w-full pl-12 h-12 rounded-lg outline-none bg-background focus:ring-2 focus:ring-primary/50"
+                  placeholder="Desk A1 / Meeting Room 101"
+                  value={formData.name}
+                  onChange={(e) => handleChange("name", e.target.value)}
                   required
-                  value={formData.capacity}
-                  onChange={(event) =>
-                    updateField("capacity", event.target.value)
-                  }
-                  placeholder="Number of seats"
-                  className="mt-2 w-full rounded-xl border border-slate-200 px-4 py-2.5 text-sm text-slate-900 transition focus:border-indigo-500 focus:outline-none focus:ring-2 focus:ring-indigo-500/10"
                 />
               </div>
-            )}
+            </div>
 
             <div>
-              <label className="text-sm font-medium text-slate-700">
-                Description
+              <label className="text-sm font-medium mb-1 block">
+                Workspace Type
               </label>
-              <textarea
-                rows={4}
-                value={formData.description}
-                onChange={(event) =>
-                  updateField("description", event.target.value)
+              <select
+                className="w-full h-12 rounded-lg outline-none bg-background focus:ring-2 focus:ring-primary/50 px-4"
+                value={formData.type}
+                onChange={(e) => handleChange("type", e.target.value)}
+              >
+                <option value="desk">Desk</option>
+                <option value="meeting-room">Meeting Room</option>
+              </select>
+            </div>
+          </div>
+
+          {/* Location */}
+          <div>
+            <h3 className="text-lg font-semibold mb-4 flex items-center gap-2">
+              <MapPin className="w-5 h-5 text-primary" />
+              Location Details
+            </h3>
+
+            <div className="grid md:grid-cols-2 gap-6">
+              <input
+                className="h-12 rounded-lg outline-none bg-background focus:ring-2 focus:ring-primary/50 px-4"
+                placeholder="Building"
+                value={formData.location.building}
+                onChange={(e) =>
+                  handleLocationChange("building", e.target.value)
                 }
-                placeholder="Highlight what makes this workspace unique"
-                className="mt-2 w-full rounded-xl border border-slate-200 px-4 py-3 text-sm text-slate-900 transition focus:border-indigo-500 focus:outline-none focus:ring-2 focus:ring-indigo-500/10"
+              />
+              <input
+                className="h-12 rounded-lg outline-none bg-background focus:ring-2 focus:ring-primary/50 px-4"
+                placeholder="Floor"
+                value={formData.location.floor}
+                onChange={(e) => handleLocationChange("floor", e.target.value)}
+              />
+              <input
+                className="h-12 rounded-lg outline-none bg-background focus:ring-2 focus:ring-primary/50 px-4"
+                placeholder="Zone"
+                value={formData.location.zone}
+                onChange={(e) => handleLocationChange("zone", e.target.value)}
+              />
+              <input
+                className="h-12 rounded-lg outline-none bg-background focus:ring-2 focus:ring-primary/50 px-4"
+                placeholder="Description (optional)"
+                value={formData.location.description}
+                onChange={(e) =>
+                  handleLocationChange("description", e.target.value)
+                }
               />
             </div>
-          </section>
+          </div>
 
-          <section className="space-y-6 rounded-3xl border border-slate-200 bg-white p-6 shadow-sm">
+          {/* Capacity & Status */}
+          <div className="grid md:grid-cols-2 gap-6">
             <div>
-              <label className="text-sm font-medium text-slate-700">
+              <label className="text-sm font-medium mb-1 flex items-center gap-2">
+                <Users className="w-4 h-4" />
+                Capacity
+              </label>
+              <input
+                type="number"
+                min={1}
+                className="w-full h-12 rounded-lg outline-none bg-background focus:ring-2 focus:ring-primary/50 px-4"
+                value={formData.capacity}
+                onChange={(e) =>
+                  handleChange("capacity", Number(e.target.value))
+                }
+              />
+            </div>
+
+            <div>
+              <label className="text-sm font-medium mb-1 flex items-center gap-2">
+                <Wrench className="w-4 h-4" />
                 Status
               </label>
-              <div className="mt-2 grid gap-2">
-                {statusOptions.map(({ value, label }) => {
-                  const isActive = formData.status === value;
-                  return (
-                    <button
-                      key={value}
-                      type="button"
-                      onClick={() => updateField("status", value)}
-                      className={`flex items-center justify-between rounded-xl border px-4 py-2 text-sm transition ${
-                        isActive
-                          ? "border-emerald-500 bg-emerald-50 text-emerald-600"
-                          : "border-slate-200 text-slate-600 hover:border-slate-300"
-                      }`}
-                    >
-                      {label}
-                      {isActive && <Check className="h-4 w-4" />}
-                    </button>
-                  );
-                })}
-              </div>
+              <select
+                className="w-full h-12 rounded-lg outline-none bg-background focus:ring-2 focus:ring-primary/50 px-4"
+                value={formData.status}
+                onChange={(e) => handleChange("status", e.target.value)}
+              >
+                <option value="active">Active</option>
+                <option value="maintenance">Maintenance</option>
+                <option value="inactive">Inactive</option>
+              </select>
             </div>
+          </div>
 
-            <div>
-              <div className="flex items-center justify-between">
-                <label className="text-sm font-medium text-slate-700">
-                  Amenities
-                </label>
-                {formData.amenities.length > 0 && (
-                  <span className="text-xs font-medium text-indigo-600">
-                    {formData.amenities.length} selected
-                  </span>
-                )}
-              </div>
-              <div className="mt-3 flex gap-2">
-                <input
-                  value={amenityDraft}
-                  onChange={(event) => setAmenityDraft(event.target.value)}
-                  onKeyDown={(event) => {
-                    if (event.key === "Enter") {
-                      event.preventDefault();
-                      handleAmenityAdd();
-                    }
-                  }}
-                  placeholder="Add an amenity and press Enter"
-                  className="flex-1 rounded-xl border border-slate-200 px-4 py-2 text-sm text-slate-900 transition focus:border-indigo-500 focus:outline-none focus:ring-2 focus:ring-indigo-500/10"
-                />
-                <button
-                  type="button"
-                  onClick={handleAmenityAdd}
-                  className="inline-flex items-center gap-1 rounded-xl border border-slate-200 px-3 py-2 text-sm font-medium text-slate-600 transition hover:border-slate-300 hover:bg-slate-50"
-                >
-                  <Plus className="h-4 w-4" />
-                  Add
-                </button>
-              </div>
-              {formData.amenities.length > 0 ? (
-                <div className="mt-4 flex flex-wrap gap-2">
-                  {formData.amenities.map((amenity) => (
-                    <span
-                      key={amenity}
-                      className="inline-flex items-center gap-2 rounded-full bg-indigo-50 px-3 py-1 text-xs font-medium text-indigo-600"
-                    >
-                      {amenity}
-                      <button
-                        type="button"
-                        onClick={() => handleAmenityRemove(amenity)}
-                        className="text-indigo-500 transition hover:text-indigo-700"
-                        aria-label={`Remove ${amenity}`}
-                      >
-                        <X className="h-3 w-3" />
-                      </button>
-                    </span>
-                  ))}
-                </div>
-              ) : (
-                <p className="mt-4 text-xs text-slate-400">
-                  No amenities added yet. Common examples include monitors,
-                  phone booths, or whiteboards.
-                </p>
-              )}
-            </div>
-
-            <div className="flex items-center justify-between rounded-2xl border border-slate-200 bg-slate-50 px-4 py-3">
-              <div>
-                <p className="text-sm font-semibold text-slate-700">
-                  Show in directory
-                </p>
-                <p className="text-xs text-slate-500">
-                  Inactive workspaces remain hidden from booking.
-                </p>
-              </div>
+          {/* Amenities */}
+          <div>
+            <label className="text-sm font-medium mb-2 block">Amenities</label>
+            <div className="flex gap-3 mb-3">
+              <input
+                className="flex-1 h-12 rounded-lg outline-none bg-background focus:ring-2 focus:ring-primary/50 px-4"
+                placeholder="e.g. Projector, Whiteboard"
+                value={amenityInput}
+                onChange={(e) => setAmenityInput(e.target.value)}
+              />
               <button
                 type="button"
-                onClick={() => updateField("isActive", !formData.isActive)}
-                className={`relative inline-flex h-6 w-11 items-center rounded-full transition ${
-                  formData.isActive ? "bg-indigo-600" : "bg-slate-300"
-                }`}
+                onClick={addAmenity}
+                className="h-12 px-4 rounded-lg bg-primary text-white hover:bg-primary/90"
               >
-                <span
-                  className={`inline-block h-5 w-5 transform rounded-full bg-white transition ${
-                    formData.isActive ? "translate-x-5" : "translate-x-1"
-                  }`}
-                />
+                <Plus className="w-5 h-5" />
               </button>
             </div>
 
-            <div className="rounded-2xl border border-slate-200 bg-indigo-50 px-4 py-3 text-xs text-indigo-600">
-              Data preview updates live so you can quickly confirm accuracy
-              before saving.
+            <div className="flex flex-wrap gap-2">
+              {formData.amenities.map((item, index) => (
+                <span
+                  key={index}
+                  className="flex items-center gap-2 px-3 py-1 rounded-full  bg-muted text-sm"
+                >
+                  {item}
+                  <button type="button" onClick={() => removeAmenity(index)}>
+                    <X className="w-4 h-4 text-muted-foreground hover:text-error" />
+                  </button>
+                </span>
+              ))}
             </div>
-          </section>
+          </div>
+
+          {/* Submit */}
+          <button
+            type="submit"
+            disabled={loading}
+            className="w-full h-14 rounded-xl bg-primary text-white font-semibold hover:bg-primary/90 transition"
+          >
+            {loading ? "Creating..." : "Create Workspace"}
+          </button>
         </form>
       </div>
-    </div>
+    </section>
   );
 };
 
