@@ -1,6 +1,7 @@
 import { createContext, useContext, useState, useEffect } from "react";
 import axios from "axios";
 import { toast } from 'react-toastify';
+import { toast } from 'react-toastify';
 
 // Create the context
 const NotificationContext = createContext();
