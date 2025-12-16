@@ -1,0 +1,3 @@
+- [x] Update useUserRole.jsx to use correct server URL (localhost:5000/api)
+- [x] Update DashboardHome.jsx to use correct server URL (localhost:5000/api)
+- [x] Update NotificationContext.jsx to use correct server URL (localhost:5000/api)
