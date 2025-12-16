@@ -18,6 +18,7 @@ export const useNotification = () => {
 export const NotificationProvider = ({ children }) => {
   const [notifications, setNotifications] = useState([]);
 
+  // Fetch notifications from backend
   const fetchNotifications = async () => {
     try {
       const response = await axios.get(
@@ -35,6 +36,7 @@ export const NotificationProvider = ({ children }) => {
     }
   };
 
+  // Create a new notification
   const createNotification = async (notificationData) => {
     try {
       const response = await axios.post(
@@ -49,6 +51,7 @@ export const NotificationProvider = ({ children }) => {
     }
   };
 
+  // Mark a notification as read
   const markAsRead = async (id) => {
     try {
       await axios.patch(`http://localhost:3000/api/notifications/${id}/read`);
@@ -60,6 +63,7 @@ export const NotificationProvider = ({ children }) => {
     }
   };
 
+  // Delete a notification
   const deleteNotification = async (id) => {
     try {
       await axios.delete(`http://localhost:3000/api/notifications/${id}`);
@@ -87,6 +91,7 @@ export const NotificationProvider = ({ children }) => {
     }
   };
 
+  // Fetch notifications on mount
   useEffect(() => {
     fetchNotifications();
   }, []);

@@ -1,5 +1,4 @@
 import React, { useEffect, useState, useMemo } from "react";
-import React from "react";
 import AnalyticsHeader from "../AnalyticsComponents/AnalyticsHeader";
 import SummaryCards from "../AnalyticsComponents/SummaryCards";
 import DeskUsageChart from "../AnalyticsComponents/DeskUsageChart";
