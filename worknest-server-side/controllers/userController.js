@@ -61,6 +61,18 @@ const createUser = async (req, res) => {
       }
     );
 
+    // Send confirmation email after successful user creation
+    try {
+      await sendEmail(
+        user.email,
+        "Welcome to WorkNest!",
+        `Hi ${user.name},\n\nWelcome to WorkNest! Your account has been successfully created. You can now log in and start managing your workspace.\n\nBest regards,\nThe WorkNest Team`
+      );
+    } catch (emailError) {
+      console.error("Error sending confirmation email:", emailError);
+      // Note: We don't fail the user creation if email sending fails
+    }
+
     res.status(200).json({
       success: true,
       user,

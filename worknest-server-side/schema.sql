@@ -1,7 +1,4 @@
--- Relational Database Schema for Employee Attendance and Activity Tracking System
--- Designed for MySQL/PostgreSQL
 
--- Employees table to store employee details
 CREATE TABLE Employees (
     id INT AUTO_INCREMENT PRIMARY KEY,
     uid VARCHAR(50) NOT NULL UNIQUE,
@@ -14,7 +11,7 @@ CREATE TABLE Employees (
     is_active BOOLEAN DEFAULT FALSE  -- Indicates if employee is currently checked in
 );
 
--- Attendance table to store attendance records
+
 CREATE TABLE Attendance (
     id INT AUTO_INCREMENT PRIMARY KEY,
     employee_id INT NOT NULL,
@@ -28,7 +25,6 @@ CREATE TABLE Attendance (
     UNIQUE KEY unique_employee_date (employee_id, date)  -- Ensure one record per employee per day
 );
 
--- Indexes for performance
 CREATE INDEX idx_employee_id ON Attendance(employee_id);
 CREATE INDEX idx_date ON Attendance(date);
 CREATE INDEX idx_office_status ON Attendance(office_status);
