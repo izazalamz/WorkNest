@@ -44,7 +44,7 @@ const CompleteProfile = () => {
         profileCompleted: true,
       };
 
-      await axios.post("http://localhost:3000/api/users", payload);
+      await axios.post("http://localhost:3000/users", payload);
 
       navigate("/dashboard");
     } catch (err) {
