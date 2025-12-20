@@ -1,7 +1,8 @@
 import { useContext, useEffect, useState } from "react";
-import { User, Building2, Briefcase, Camera, Save } from "lucide-react";
+import { User, Building2, Briefcase, Camera, Save, Clock, X } from "lucide-react";
 import axios from "axios";
 import { AuthContext } from "../../contexts/AuthContext";
+import MyActivity from "./MyActivity"; // Adjust path if needed
 
 const Profile = () => {
   const { user } = useContext(AuthContext);
@@ -9,6 +10,7 @@ const Profile = () => {
   const [loading, setLoading] = useState(false);
   const [success, setSuccess] = useState("");
   const [error, setError] = useState("");
+  const [showActivityModal, setShowActivityModal] = useState(false);
 
   const [formData, setFormData] = useState({
     name: "",
@@ -23,7 +25,7 @@ const Profile = () => {
     if (!user?.uid) return;
 
     axios
-      .get(`http://localhost:3000/users/${user.uid}`)
+      .get(`http://localhost:3000/api/users/${user.uid}`)
       .then((res) => {
         const u = res.data.user;
         setFormData({
@@ -48,7 +50,7 @@ const Profile = () => {
     setLoading(true);
 
     try {
-      await axios.put(`http://localhost:3000/users/${user.uid}`, formData);
+      await axios.put(`http://localhost:3000/api/users/${user.uid}`, formData);
       setSuccess("Profile updated successfully");
     } catch (err) {
       setError("Failed to update profile");
@@ -61,11 +63,21 @@ const Profile = () => {
     <section className="min-h-screen bg-background px-4 py-10">
       <div className="mx-auto max-w-4xl space-y-8">
         {/* Header */}
-        <div>
-          <h1 className="text-3xl font-bold text-foreground">My Profile</h1>
-          <p className="text-muted-foreground mt-1">
-            Manage your personal information and preferences
-          </p>
+        <div className="flex justify-between items-center">
+          <div>
+            <h1 className="text-3xl font-bold text-foreground">My Profile</h1>
+            <p className="text-muted-foreground mt-1">
+              Manage your personal information and preferences
+            </p>
+          </div>
+          {/* View My Activity Button */}
+          <button
+            onClick={() => setShowActivityModal(true)}
+            className="flex items-center gap-2 px-4 py-2 rounded-lg bg-blue-600 text-white hover:bg-blue-700 transition"
+          >
+            <Clock className="w-4 h-4" />
+            View My Activity
+          </button>
         </div>
 
         {/* Alerts */}
@@ -168,7 +180,7 @@ const Profile = () => {
                 </div>
               </div>
 
-              {/* Role (read-only unless admin logic added) */}
+              {/* Role */}
               <div>
                 <label className="text-sm font-medium text-foreground">
                   Role
@@ -199,6 +211,27 @@ const Profile = () => {
           </div>
         </div>
       </div>
+
+      {/* Modal Overlay */}
+      {showActivityModal && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/40">
+          <div className="bg-card rounded-xl max-w-4xl w-full p-6 relative overflow-y-auto max-h-[90vh]">
+            {/* Close Button */}
+            <button
+              onClick={() => setShowActivityModal(false)}
+              className="absolute top-4 right-4 p-2 rounded-full hover:bg-muted/20 transition"
+            >
+              <X className="w-5 h-5" />
+            </button>
+
+            {/* Modal Title */}
+            <h2 className="text-2xl font-bold mb-4 text-foreground">My Activity</h2>
+
+            {/* MyActivity Component */}
+            <MyActivity />
+          </div>
+        </div>
+      )}
     </section>
   );
 };
