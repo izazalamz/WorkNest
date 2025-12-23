@@ -1,6 +1,6 @@
 import { useEffect, useState } from "react";
 import axios from "axios";
-import { Shield, User, Trash2, Ban, CheckCircle, Loader2 } from "lucide-react";
+import { Shield, User, Trash2, Ban, CheckCircle } from "lucide-react";
 import Loading from "../../components/Loading";
 import Swal from "sweetalert2";
 
@@ -12,7 +12,8 @@ const AllUsers = () => {
   const fetchUsers = async () => {
     try {
       const res = await axios.get("http://localhost:3000/users");
-      setUsers(res.data.users || []);
+
+      setUsers(res.data.user || []);
     } catch (err) {
       console.error(err);
     } finally {

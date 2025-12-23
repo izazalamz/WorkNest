@@ -10,7 +10,7 @@ const getUser = async (req, res) => {
     }
     res.status(200).json({
       success: true,
-      users: allUsers,
+      user: allUsers,
     });
   } catch (error) {
     console.log(error);
@@ -22,7 +22,7 @@ const getSingleUser = async (req, res) => {
     const { uid } = req.params;
     const singleUser = await User.findOne({ uid });
     res.status(200).json({
-      users: singleUser,
+      user: singleUser,
     });
   } catch (error) {
     console.log(error);
@@ -143,6 +143,20 @@ const deleteUser = async (req, res) => {
   }
 };
 
+// get admin id
+const getAdminUser = async (req, res) => {
+  try {
+    const admin = await User.findOne({ role: "admin", isActive: true });
+    if (!admin) {
+      return res.status(404).json({ message: "Admin not found" });
+    }
+
+    res.status(200).json(admin);
+  } catch (error) {
+    res.status(500).json({ message: "Server error" });
+  }
+};
+
 module.exports = {
   getUser,
   getUserRoleByEmail,
@@ -150,4 +164,5 @@ module.exports = {
   createUser,
   updateUser,
   deleteUser,
+  getAdminUser,
 };

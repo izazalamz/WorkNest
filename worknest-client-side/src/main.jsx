@@ -9,7 +9,6 @@ import { router } from "./routes/Routes.jsx";
 import AuthProvider from "./contexts/AuthProvider.jsx";
 import { NotificationProvider } from "./contexts/NotificationContext.jsx";
 
-
 createRoot(document.getElementById("root")).render(
   <StrictMode>
     <AuthProvider>

@@ -17,6 +17,7 @@ import {
   ChevronDown,
   HelpCircle,
   PlusSquare,
+  ChartBar,
 } from "lucide-react";
 import { AuthContext } from "../contexts/AuthContext";
 import useUserRole from "../hooks/useUserRole";
@@ -67,7 +68,7 @@ const DashboardLayout = () => {
     axios
       .get(`http://localhost:3000/users/${user.uid}`)
       .then((res) => {
-        const u = res.data.users;
+        const u = res.data.user;
         setUserData({
           name: u.name || "",
           companyName: u.companyName || "",
@@ -135,9 +136,9 @@ const DashboardLayout = () => {
                 className="flex items-center space-x-3 p-2 rounded-lg hover:bg-muted transition-colors"
               >
                 <div className="w-10 h-10 rounded-full bg-gradient-to-br from-primary to-primary/80 flex items-center justify-center">
-                  {userData.avatar ? (
+                  {userData.photoURL ? (
                     <img
-                      src={userData.avatar}
+                      src={userData.photoURL}
                       alt={userData.name}
                       className="w-full h-full rounded-full object-cover"
                     />
@@ -245,21 +246,24 @@ const DashboardLayout = () => {
               <LayoutDashboard size={20} />
               <span className="font-medium">Dashboard</span>
             </NavLink>
+
+            <NavLink to="/dashboard/desk-booking" className={linkClasses}>
+              <MapPin size={20} />
+              <span className="font-medium">Desk Booking</span>
+            </NavLink>
+            <NavLink to="/dashboard/meeting-rooms" className={linkClasses}>
+              <Calendar size={20} />
+              <span className="font-medium">Meeting Rooms</span>
+            </NavLink>
+            <NavLink to="/dashboard/my-bookings" className={linkClasses}>
+              <Users size={20} />
+              <span className="font-medium">My Bookings</span>
+            </NavLink>
             {role === "employee" && (
-              <>
-                <NavLink to="/dashboard/desk-booking" className={linkClasses}>
-                  <MapPin size={20} />
-                  <span className="font-medium">Desk Booking</span>
-                </NavLink>
-                <NavLink to="/dashboard/meeting-rooms" className={linkClasses}>
-                  <Calendar size={20} />
-                  <span className="font-medium">Meeting Rooms</span>
-                </NavLink>
-                <NavLink to="/dashboard/my-bookings" className={linkClasses}>
-                  <Users size={20} />
-                  <span className="font-medium">My Bookings</span>
-                </NavLink>
-              </>
+              <NavLink to="/dashboard/support" className={linkClasses}>
+                <ChartBar size={20} />
+                <span className="font-medium">Support</span>
+              </NavLink>
             )}
 
             {role === "admin" && (
@@ -282,6 +286,10 @@ const DashboardLayout = () => {
                 <NavLink to="/dashboard/analytics" className={linkClasses}>
                   <BarChart3 size={20} />
                   <span className="font-medium">Analytics</span>
+                </NavLink>
+                <NavLink to="/dashboard/admin/support" className={linkClasses}>
+                  <ChartBar size={20} />
+                  <span className="font-medium">Support</span>
                 </NavLink>
               </>
             )}

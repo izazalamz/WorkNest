@@ -70,7 +70,7 @@ const SignUp = () => {
 
       const res = await axios.get(`http://localhost:3000/users/${user.uid}`);
 
-      if (!res.data.users) {
+      if (!res.data.user) {
         // if first time signup, then create user
         await axios.post("http://localhost:3000/users", {
           uid: user.uid,
@@ -82,7 +82,7 @@ const SignUp = () => {
         navigate("/complete-profile");
       } else {
         // if user already exists
-        if (!res.data.users.profileCompleted) {
+        if (!res.data.user.profileCompleted) {
           navigate("/complete-profile");
         } else {
           navigate("/dashboard");
@@ -104,7 +104,7 @@ const SignUp = () => {
 
       const res = await axios.get(`http://localhost:3000/users/${user.uid}`);
 
-      if (!res.data.users) {
+      if (!res.data.user) {
         await axios.post("http://localhost:3000/users", {
           uid: user.uid,
           email: user.email,
@@ -115,7 +115,7 @@ const SignUp = () => {
 
         navigate("/complete-profile");
       } else {
-        res.data.users.profileCompleted
+        res.data.user.profileCompleted
           ? navigate("/dashboard")
           : navigate("/complete-profile");
       }

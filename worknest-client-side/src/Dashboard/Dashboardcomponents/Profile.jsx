@@ -25,7 +25,7 @@ const Profile = () => {
     axios
       .get(`http://localhost:3000/users/${user.uid}`)
       .then((res) => {
-        const u = res.data.users;
+        const u = res.data.user;
         setFormData({
           name: u.name || "",
           companyName: u.companyName || "",

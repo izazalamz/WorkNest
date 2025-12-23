@@ -7,7 +7,10 @@ const {
   updateUser,
   createUser,
   deleteUser,
+  getAdminUser,
 } = require("../controllers/userController");
+
+router.get("/users/admin", getAdminUser); // get admin
 
 router.get("/users", getUser);
 

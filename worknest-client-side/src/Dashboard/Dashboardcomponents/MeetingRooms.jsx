@@ -56,7 +56,7 @@ const MeetingRooms = () => {
     const fetchMeetingRooms = async () => {
       try {
         const res = await axios.get(
-          "http://localhost:3000/dashboard/workspaces"
+          "http://localhost:3000/dashboard/workspace"
         );
 
         const rooms = (res.data.workspaces || []).filter(
@@ -193,9 +193,7 @@ Capacity: ${room.capacity}
 
             <p
               className={`mt-2 text-xs font-medium ${
-                room.status === "active"
-                  ? "text-green-600"
-                  : "text-red-600"
+                room.status === "active" ? "text-green-600" : "text-red-600"
               }`}
             >
               {room.status}
