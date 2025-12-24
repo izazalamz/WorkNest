@@ -111,6 +111,10 @@ export const router = createBrowserRouter([
         path: "/dashboard/activity",
         Component: MyActivity,
       },
+      {
+        path: "/dashboard/active",
+        Component: ShowActive,
+      },
     ],
   },
 ]);

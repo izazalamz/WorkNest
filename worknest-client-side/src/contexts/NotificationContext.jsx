@@ -23,7 +23,13 @@ export const NotificationProvider = ({ children }) => {
       const response = await axios.get("http://localhost:3000/api/notifications");
       setNotifications(response.data);
     } catch (error) {
-      console.error("Error fetching notifications:", error);
+      // Handle 404 gracefully - notifications endpoint might not be implemented yet
+      if (error.response?.status === 404) {
+        console.log('ℹ️ Notifications endpoint not available yet');
+        setNotifications([]);
+      } else {
+        console.error("Error fetching notifications:", error);
+      }
     }
   };
 

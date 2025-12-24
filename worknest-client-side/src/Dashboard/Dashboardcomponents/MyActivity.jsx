@@ -1,5 +1,5 @@
 import { useState, useEffect, useContext, useRef } from "react";
-import { Clock, Timer, Calendar, User, LogIn, LogOut } from "lucide-react";
+import { Clock, Timer, Calendar, User, LogIn, LogOut, Building2, Home } from "lucide-react";
 import { AuthContext } from "../../contexts/AuthContext";
 import axios from "axios";
 
@@ -12,13 +12,8 @@ const MyActivity = () => {
   const [success, setSuccess] = useState("");
   const [userData, setUserData] = useState({});
   const [buttonLoading, setButtonLoading] = useState(false);
+  const [selectedWorkMode, setSelectedWorkMode] = useState(null);
   const hasRun = useRef(false);
-
-  const getToday = () => {
-    const d = new Date();
-    d.setHours(0, 0, 0, 0);
-    return d;
-  };
 
   const formatTime = dateString =>
     dateString
@@ -32,7 +27,8 @@ const MyActivity = () => {
       const response = await axios.get(`http://localhost:3000/users/${user.uid}`);
       setUserData(response.data.users);
       return response.data.users;
-    } catch {
+    } catch (err) {
+      console.error("Error fetching user data:", err);
       setError("Failed to load user data");
       return {};
     }
@@ -40,24 +36,56 @@ const MyActivity = () => {
 
   const fetchAttendanceData = async () => {
     try {
+      console.log("🔄 Fetching attendance data for user:", user.uid);
       const response = await axios.get(`http://localhost:3000/api/attendance/${user.uid}`);
       const data = response.data.attendance || [];
+      console.log("📊 Received attendance data:", data);
+      
       setAttendanceData(data);
       
-      const today = getToday();
+      const today = new Date();
+      today.setUTCHours(0, 0, 0, 0);
+      const todayTime = today.getTime();
+      
+      console.log("🔍 Looking for today's record (UTC midnight):", today.toISOString());
+      
       const todayRecord = data.find(record => {
+        if (!record.date) {
+          console.log("⚠️ Record has no date:", record);
+          return false;
+        }
+        
         const recordDate = new Date(record.date);
-        recordDate.setHours(0, 0, 0, 0);
-        return recordDate.getTime() === today.getTime();
+        recordDate.setUTCHours(0, 0, 0, 0);
+        const recordTime = recordDate.getTime();
+        
+        const isMatch = recordTime === todayTime;
+        console.log(`  Comparing: ${recordDate.toISOString()} === ${today.toISOString()} → ${isMatch}`);
+        
+        return isMatch;
       });
       
       if (todayRecord) {
+        console.log("✅ Today's record FOUND:", todayRecord);
         setCurrentStatus(todayRecord);
+        setSelectedWorkMode(todayRecord.workMode);
+      } else {
+        console.log("❌ No record found for today");
+        setCurrentStatus(null);
+        setSelectedWorkMode(null);
       }
       
       return data;
-    } catch {
-      setError("Failed to fetch attendance data");
+    } catch (err) {
+      console.error("❌ Error fetching attendance:", err);
+      
+      if (err.response?.status === 404) {
+        console.log("ℹ️ No attendance records found for this user yet");
+        setAttendanceData([]);
+        setCurrentStatus(null);
+      } else {
+        setError("Failed to fetch attendance data");
+      }
       return [];
     }
   };
@@ -70,26 +98,54 @@ const MyActivity = () => {
       return;
     }
 
+    if (!selectedWorkMode) {
+      setError("Please select your work mode (Office or Remote) before checking in.");
+      return;
+    }
+
+    if (!userData.name) {
+      setError("Loading user data, please try again...");
+      return;
+    }
+
     try {
       setButtonLoading(true);
       setError("");
       setSuccess("");
 
+      console.log("🔵 Sending check-in request...");
+      console.log("📝 Using data:", {
+        employeeId: user.uid,
+        employeeName: userData.name,
+        workMode: selectedWorkMode
+      });
+      
       const response = await axios.post("http://localhost:3000/api/attendance/checkin", {
         employeeId: user.uid,
-        employeeName: userData.name || "Unknown User",
+        employeeName: userData.name,
+        workMode: selectedWorkMode,
       });
 
+      console.log("✅ Check-in response:", response.data);
+
       if (response.data.success) {
-        setCurrentStatus(response.data.attendance);
-        setSuccess("Check-in successful!");
+        const attendanceRecord = response.data.attendance;
+        console.log("📝 Setting current status to:", attendanceRecord);
         
-        await fetchAttendanceData();
+        setCurrentStatus(attendanceRecord);
+        setSuccess(`Check-in successful! Work mode: ${selectedWorkMode === 'office' ? 'Office' : 'Remote'}`);
+        
+        setTimeout(async () => {
+          console.log("🔄 Refreshing attendance data after check-in...");
+          await fetchAttendanceData();
+        }, 500);
         
         setTimeout(() => setSuccess(""), 3000);
       }
     } catch (error) {
-      console.error("Check-in failed:", error);
+      console.error("❌ Check-in failed:", error);
+      console.error("Response data:", error.response?.data);
+      
       if (error.response?.data?.message === "Already checked in today") {
         setError("Already checked in today.");
       } else {
@@ -118,20 +174,32 @@ const MyActivity = () => {
       setError("");
       setSuccess("");
 
+      console.log("🔴 Sending check-out request...");
+      console.log("📝 Current status before checkout:", currentStatus);
+      
       const response = await axios.put("http://localhost:3000/api/attendance/checkout", {
         employeeId: user.uid,
       });
 
+      console.log("✅ Check-out response:", response.data);
+
       if (response.data.success) {
-        setCurrentStatus(response.data.attendance);
+        const attendanceRecord = response.data.attendance;
+        console.log("📝 Setting current status to:", attendanceRecord);
+        
+        setCurrentStatus(attendanceRecord);
         setSuccess("Check-out successful!");
         
-        await fetchAttendanceData();
+        setTimeout(async () => {
+          console.log("🔄 Refreshing attendance data after check-out...");
+          await fetchAttendanceData();
+        }, 500);
         
         setTimeout(() => setSuccess(""), 3000);
       }
     } catch (error) {
-      console.error("Check-out failed:", error);
+      console.error("❌ Check-out failed:", error);
+      console.error("Response data:", error.response?.data);
       setError(error.response?.data?.message || "Check-out failed");
     } finally {
       setButtonLoading(false);
@@ -200,6 +268,60 @@ const MyActivity = () => {
 
       <div className="bg-card border border-border rounded-lg p-6">
         <h2 className="text-lg font-semibold mb-4">Today's Status</h2>
+        
+        {/* Work Mode Selection */}
+        {!currentStatus?.checkInTime && (
+          <div className="mb-6">
+            <p className="text-sm font-medium text-muted-foreground mb-3">Select Work Mode:</p>
+            <div className="grid grid-cols-2 gap-4">
+              <button
+                onClick={() => setSelectedWorkMode('office')}
+                disabled={currentStatus?.checkInTime}
+                className={`flex items-center justify-center gap-3 p-4 rounded-lg border-2 transition ${
+                  selectedWorkMode === 'office'
+                    ? 'border-blue-600 bg-blue-50 text-blue-700'
+                    : 'border-gray-300 bg-white hover:border-blue-400'
+                } ${currentStatus?.checkInTime ? 'opacity-50 cursor-not-allowed' : 'cursor-pointer'}`}
+              >
+                <Building2 className="w-6 h-6" />
+                <span className="font-medium">Office</span>
+              </button>
+              
+              <button
+                onClick={() => setSelectedWorkMode('remote')}
+                disabled={currentStatus?.checkInTime}
+                className={`flex items-center justify-center gap-3 p-4 rounded-lg border-2 transition ${
+                  selectedWorkMode === 'remote'
+                    ? 'border-purple-600 bg-purple-50 text-purple-700'
+                    : 'border-gray-300 bg-white hover:border-purple-400'
+                } ${currentStatus?.checkInTime ? 'opacity-50 cursor-not-allowed' : 'cursor-pointer'}`}
+              >
+                <Home className="w-6 h-6" />
+                <span className="font-medium">Remote</span>
+              </button>
+            </div>
+          </div>
+        )}
+
+        {/* Current Work Mode Display (when checked in) */}
+        {currentStatus?.checkInTime && currentStatus?.workMode && (
+          <div className="mb-6 p-4 bg-muted/50 rounded-lg">
+            <div className="flex items-center gap-2">
+              {currentStatus.workMode === 'office' ? (
+                <>
+                  <Building2 className="w-5 h-5 text-blue-600" />
+                  <span className="font-medium text-blue-700">Working from Office</span>
+                </>
+              ) : (
+                <>
+                  <Home className="w-5 h-5 text-purple-600" />
+                  <span className="font-medium text-purple-700">Working Remotely</span>
+                </>
+              )}
+            </div>
+          </div>
+        )}
+
         <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mb-6">
           <div className="flex items-center gap-3 p-4 bg-muted/50 rounded-lg">
             <LogIn className="w-5 h-5 text-green-600" />
@@ -227,11 +349,11 @@ const MyActivity = () => {
         <div className="flex gap-4">
           <button
             onClick={handleCheckIn}
-            disabled={buttonLoading || currentStatus?.checkInTime}
+            disabled={buttonLoading || currentStatus?.checkInTime || !userData.name || !selectedWorkMode}
             className="flex-1 bg-green-600 hover:bg-green-700 disabled:bg-gray-400 text-white font-medium py-3 px-4 rounded-lg transition flex items-center justify-center gap-2"
           >
             <LogIn className="w-5 h-5" />
-            {buttonLoading ? "Processing..." : "Check In"}
+            {buttonLoading ? "Processing..." : !userData.name ? "Loading..." : !selectedWorkMode ? "Select Work Mode" : "Check In"}
           </button>
           <button
             onClick={handleCheckOut}
@@ -262,6 +384,7 @@ const MyActivity = () => {
             <thead>
               <tr className="border-b border-border">
                 <th className="text-left py-3 px-4 font-medium">Date</th>
+                <th className="text-left py-3 px-4 font-medium">Work Mode</th>
                 <th className="text-left py-3 px-4 font-medium">Check-in Time</th>
                 <th className="text-left py-3 px-4 font-medium">Check-out Time</th>
                 <th className="text-left py-3 px-4 font-medium">Total Hours</th>
@@ -270,7 +393,7 @@ const MyActivity = () => {
             <tbody>
               {attendanceData.length === 0 ? (
                 <tr>
-                  <td colSpan="4" className="text-center py-8 text-muted-foreground">
+                  <td colSpan="5" className="text-center py-8 text-muted-foreground">
                     No attendance records found
                   </td>
                 </tr>
@@ -280,6 +403,21 @@ const MyActivity = () => {
                     <td className="py-3 px-4 flex items-center gap-2">
                       <Calendar className="w-4 h-4 text-muted-foreground" />
                       {formatDate(record.date)}
+                    </td>
+                    <td className="py-3 px-4">
+                      <div className="flex items-center gap-2">
+                        {record.workMode === 'office' ? (
+                          <>
+                            <Building2 className="w-4 h-4 text-blue-600" />
+                            <span className="text-blue-700 font-medium">Office</span>
+                          </>
+                        ) : (
+                          <>
+                            <Home className="w-4 h-4 text-purple-600" />
+                            <span className="text-purple-700 font-medium">Remote</span>
+                          </>
+                        )}
+                      </div>
                     </td>
                     <td className="py-3 px-4">{formatTime(record.checkInTime)}</td>
                     <td className="py-3 px-4">{formatTime(record.checkOutTime)}</td>

@@ -1,6 +1,8 @@
 import { useState, useEffect, useContext } from "react";
 import { NavLink, Outlet, useNavigate } from "react-router";
+import { Link } from "react-router-dom";
 import {
+  Activity,
   Menu,
   X,
   LayoutDashboard,
@@ -58,8 +60,6 @@ const DashboardLayout = () => {
       navigate("/login");
     }
   }, [user, loading, navigate]);
-
-  // Mock user data - replace with actual data from your context
 
   // Fetch user data
   useEffect(() => {
@@ -301,9 +301,15 @@ const DashboardLayout = () => {
               <User size={20} />
               <span className="font-medium">My Profile</span>
             </NavLink>
+            
             <NavLink to="/dashboard/activity" className={linkClasses}>
-              <User size={20} />
+              <Activity size={20} />
               <span className="font-medium">My Activity</span>
+            </NavLink>
+            
+            <NavLink to="/dashboard/active" className={linkClasses}>
+              <Users size={20} />
+              <span className="font-medium">Active Status</span>
             </NavLink>
           </nav>
 

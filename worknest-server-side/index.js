@@ -1,5 +1,6 @@
 const express = require("express");
 const cors = require("cors");
+const jsonServer = require("json-server");
 const connectDB = require("./config/db");
 const http = require("http");
 const { Server } = require("socket.io");
@@ -34,7 +35,6 @@ socketHandler(io);
 // DB
 connectDB();
 
-// Middleware
 // Middleware - CORS with proper configuration
 app.use(cors({
   origin: ['http://localhost:5173', 'http://localhost:3000', '*'],
@@ -60,7 +60,12 @@ app.get('/health', (req, res) => {
   res.json({ success: true, message: 'Server is running' });
 });
 
-// Routes
+// ===== MONGODB ROUTES (Custom Backend) =====
+// These handle attendance with MongoDB
+app.use("/api", attendanceRoutes);
+app.use("/api/notifications", notificationRoutes);
+
+// ===== OTHER CUSTOM ROUTES =====
 app.use(userRoutes);
 app.use("/dashboard", workspaceRoutes);
 app.use("/dashboard", analyticsRoutes);

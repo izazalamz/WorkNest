@@ -13,6 +13,8 @@ import MeetingRooms from "./Dashboard/Dashboardcomponents/MeetingRooms";
 import Profile from "./Dashboard/Dashboardcomponents/Profile";
 import MyBookings from "./Dashboard/Dashboardcomponents/MyBookings";
 import Analytics from "./Dashboard/Dashboardcomponents/Analytics";
+import MyActivity from "./Dashboard/Dashboardcomponents/MyActivity";
+import ShowActive from "./Dashboard/Dashboardcomponents/ShowActive";
 
 import AuthProvider from "./contexts/AuthProvider";
 import { NotificationProvider } from "./contexts/NotificationContext.jsx";
@@ -39,6 +41,8 @@ const router = createBrowserRouter([
       { path: "/dashboard/my-bookings", Component: MyBookings },
       { path: "/dashboard/analytics", Component: Analytics },
       { path: "/dashboard/profile", Component: Profile },
+      { path: "/dashboard/activity", Component: MyActivity },
+      { path: "/dashboard/active", Component: ShowActive }, // NEW ROUTE
     ],
   },
 ]);

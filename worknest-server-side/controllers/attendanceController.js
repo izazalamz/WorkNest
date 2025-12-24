@@ -1,33 +1,134 @@
 const Attendance = require("../models/attendanceModel");
 
-// Check-in function
+// Try to import User model
+let User = null;
+try {
+  User = require("../models/User");
+} catch (error) {
+  console.log("Note: User model not found. Active status will show basic employee info only.");
+}
+
+// Get today's active users
+const getActiveTodayUsers = async (req, res) => {
+  try {
+    console.log("=== GET ACTIVE TODAY USERS REQUEST ===");
+
+    const today = new Date();
+    today.setUTCHours(0, 0, 0, 0);
+
+    const attendanceRecords = await Attendance.find({
+      date: today
+    }).sort({ checkInTime: -1 }).lean();
+
+    console.log(`Found ${attendanceRecords.length} attendance records for today`);
+
+    const employeeIds = attendanceRecords.map(record => record.employeeId);
+
+    let usersMap = {};
+    if (User) {
+      try {
+        const users = await User.find({ uid: { $in: employeeIds } }).lean();
+        usersMap = users.reduce((map, user) => {
+          map[user.uid] = user;
+          return map;
+        }, {});
+        console.log(`Fetched ${users.length} user details`);
+      } catch (error) {
+        console.log("Could not fetch user details:", error.message);
+      }
+    }
+
+    const activeUsers = attendanceRecords.map(record => {
+      const user = usersMap[record.employeeId];
+      
+      let activeTime = 0;
+      let status = 'inactive';
+      
+      if (record.checkInTime) {
+        if (record.checkOutTime) {
+          activeTime = record.totalHours || 0;
+          status = 'checked_out';
+        } else {
+          const now = new Date();
+          const msDiff = now - new Date(record.checkInTime);
+          activeTime = msDiff / (1000 * 60 * 60);
+          status = 'active';
+        }
+      }
+
+      return {
+        employeeId: record.employeeId,
+        employeeName: record.employeeName || user?.name || 'Unknown',
+        email: user?.email || 'N/A',
+        department: user?.department || 'N/A',
+        checkInTime: record.checkInTime,
+        checkOutTime: record.checkOutTime,
+        totalHours: parseFloat(activeTime.toFixed(2)),
+        status: status,
+        isActive: status === 'active',
+        workMode: record.workMode || 'office' // Include work mode
+      };
+    });
+
+    const activeCount = activeUsers.filter(u => u.isActive).length;
+
+    console.log(`✅ Returning ${activeUsers.length} users (${activeCount} active)`);
+
+    return res.status(200).json({
+      success: true,
+      count: activeUsers.length,
+      activeCount: activeCount,
+      data: activeUsers
+    });
+
+  } catch (error) {
+    console.error("=== GET ACTIVE TODAY USERS ERROR ===");
+    console.error(error);
+
+    return res.status(500).json({
+      success: false,
+      message: "Failed to fetch active users",
+      error: process.env.NODE_ENV === 'development' ? error.message : undefined
+    });
+  }
+};
+
+// Check-in with work mode
 const checkIn = async (req, res) => {
   try {
-    const { employeeId, employeeName } = req.body;
+    const { employeeId, employeeName, workMode } = req.body;
 
     console.log('=== CHECK-IN REQUEST ===');
     console.log('Body:', req.body);
 
     if (!employeeId || !employeeName) {
-      console.error('Missing required fields');
+      console.error('❌ Missing required fields');
       return res.status(400).json({
         success: false,
         message: 'Missing required fields: employeeId and employeeName',
       });
     }
 
-    // Normalize date to start of day UTC
+    if (!workMode || !['office', 'remote'].includes(workMode)) {
+      console.error('❌ Invalid or missing work mode');
+      return res.status(400).json({
+        success: false,
+        message: 'Work mode must be either "office" or "remote"',
+      });
+    }
+
     const day = new Date();
     day.setUTCHours(0, 0, 0, 0);
+    
+    console.log('📅 Checking for existing record on:', day.toISOString());
 
-    // Check if already checked in today
     const existingCheckIn = await Attendance.findOne({
       employeeId: employeeId,
       date: day,
     });
 
     if (existingCheckIn) {
-      console.log('Already checked in today:', existingCheckIn);
+      console.log('⚠️ Already checked in today:', existingCheckIn);
       return res.status(200).json({
         success: true,
         message: 'Already checked in today',
@@ -42,6 +143,7 @@ const checkIn = async (req, res) => {
       checkInTime: new Date(),
       checkOutTime: null,
       totalHours: 0,
+      workMode: workMode,
     });
 
     await attendance.save();
@@ -50,24 +152,55 @@ const checkIn = async (req, res) => {
     return res.status(201).json({
       success: true,
       message: 'Check-in successful',
-      attendance,
+      attendance: attendance,
     });
   } catch (err) {
     console.error('=== CHECK-IN ERROR ===');
-    console.error(err);
+    console.error('Error name:', err.name);
+    console.error('Error code:', err.code);
+    console.error('Error message:', err.message);
 
-    // MongoDB duplicate → already checked-in today
     if (err.code === 11000) {
-      console.log('Duplicate key → already checked in today');
-      return res.status(200).json({
-        success: true,
-        message: 'Already checked in today',
-      });
+      console.log('⚠️ Duplicate key error → Fetching existing record');
+      
+      try {
+        const day = new Date();
+        day.setUTCHours(0, 0, 0, 0);
+        
+        const existingRecord = await Attendance.findOne({
+          employeeId: req.body.employeeId,
+          date: day,
+        });
+        
+        if (existingRecord) {
+          console.log('✅ Found existing record:', existingRecord);
+          return res.status(200).json({
+            success: true,
+            message: 'Already checked in today',
+            attendance: existingRecord,
+          });
+        } else {
+          console.error('❌ Duplicate error but record not found!');
+          return res.status(500).json({
+            success: false,
+            message: 'Database inconsistency detected',
+          });
+        }
+      } catch (fetchErr) {
+        console.error('❌ Error fetching existing record:', fetchErr);
+        return res.status(500).json({
+          success: false,
+          message: 'Error retrieving existing check-in record',
+        });
+      }
     }
 
-    // validation / other
     if (err.name === 'ValidationError') {
-      return res.status(400).json({ success: false, message: err.message });
+      console.error('❌ Validation error:', err.message);
+      return res.status(400).json({ 
+        success: false, 
+        message: err.message 
+      });
     }
 
     return res.status(500).json({
@@ -78,7 +211,7 @@ const checkIn = async (req, res) => {
   }
 };
 
-// Check-out function
+// Check-out function (unchanged)
 const checkOut = async (req, res) => {
   try {
     const { employeeId } = req.body;
@@ -86,21 +219,22 @@ const checkOut = async (req, res) => {
     console.log('EmployeeId:', employeeId);
 
     if (!employeeId) {
-      return res.status(400).json({ success: false, message: 'Missing employeeId' });
+      return res.status(400).json({ 
+        success: false, 
+        message: 'Missing employeeId' 
+      });
     }
 
-    // Normalize date to start of day UTC
     const day = new Date();
     day.setUTCHours(0, 0, 0, 0);
 
-    // Find today's check-in record using correct field names
     const attendance = await Attendance.findOne({
       employeeId: employeeId,
       date: day,
     });
 
     if (!attendance) {
-      console.log('No check-in record found for today');
+      console.log('❌ No check-in record found for today');
       return res.status(404).json({
         success: false,
         message: 'No check-in record found for today. Please check in first.',
@@ -108,18 +242,15 @@ const checkOut = async (req, res) => {
     }
 
     if (attendance.checkOutTime) {
-      console.log('Already checked out:', attendance);
+      console.log('⚠️ Already checked out:', attendance);
       return res.status(200).json({
         success: true,
         message: 'Already checked out',
-        attendance,
+        attendance: attendance,
       });
     }
 
-    // Record checkout time
     attendance.checkOutTime = new Date();
-
-    // Calculate total hours (float, 2 decimals)
     const msDiff = attendance.checkOutTime - attendance.checkInTime;
     attendance.totalHours = Math.round((msDiff / (1000 * 60 * 60)) * 100) / 100;
 
@@ -129,7 +260,7 @@ const checkOut = async (req, res) => {
     return res.status(200).json({
       success: true,
       message: 'Check-out successful',
-      attendance,
+      attendance: attendance,
     });
   } catch (err) {
     console.error('=== CHECK-OUT ERROR ===');
@@ -142,7 +273,7 @@ const checkOut = async (req, res) => {
   }
 };
 
-// Get attendance records for an employee
+// Get attendance function (unchanged)
 const getAttendance = async (req, res) => {
   try {
     const { employeeId } = req.params;
@@ -157,7 +288,6 @@ const getAttendance = async (req, res) => {
       });
     }
 
-    // Get all attendance records for this employee, sorted by date (newest first)
     const attendance = await Attendance.find({ employeeId: employeeId })
       .sort({ date: -1 })
       .lean();
@@ -181,7 +311,7 @@ const getAttendance = async (req, res) => {
   }
 };
 
-// Get total hours for an employee (optional: within a date range)
+// Get total hours function (unchanged)
 const getTotalHours = async (req, res) => {
   try {
     const { employeeId } = req.params;
@@ -198,10 +328,8 @@ const getTotalHours = async (req, res) => {
       });
     }
 
-    // Build query using correct field names
     const query = { employeeId: employeeId };
 
-    // Add date range if provided
     if (startDate || endDate) {
       query.date = {};
       if (startDate) {
@@ -216,15 +344,13 @@ const getTotalHours = async (req, res) => {
       }
     }
 
-    // Get attendance records
     const attendanceRecords = await Attendance.find(query).lean();
 
-    // Calculate total hours
     const totalHours = attendanceRecords.reduce((sum, record) => {
       return sum + (record.totalHours || 0);
     }, 0);
 
-    console.log(`Total hours: ${totalHours.toFixed(2)} from ${attendanceRecords.length} records`);
+    console.log(`✅ Total hours: ${totalHours.toFixed(2)} from ${attendanceRecords.length} records`);
 
     return res.status(200).json({
       success: true,
@@ -249,4 +375,5 @@ module.exports = {
   checkOut,
   getAttendance,
   getTotalHours,
+  getActiveTodayUsers,
 };
