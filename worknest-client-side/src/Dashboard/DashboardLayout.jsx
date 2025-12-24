@@ -1,6 +1,6 @@
 import { useState, useEffect, useContext } from "react";
 import { NavLink, Outlet, useNavigate } from "react-router";
-import { Link } from "react-router-dom";
+
 import {
   Activity,
   Menu,
@@ -246,7 +246,7 @@ const DashboardLayout = () => {
               <LayoutDashboard size={20} />
               <span className="font-medium">Dashboard</span>
             </NavLink>
-            
+
             <NavLink to="/dashboard/nestboard" className={linkClasses} end>
               <LayoutDashboard size={20} />
               <span className="font-medium">NestBoard</span>
@@ -303,23 +303,16 @@ const DashboardLayout = () => {
               <User size={20} />
               <span className="font-medium">My Profile</span>
             </NavLink>
-<<<<<<< HEAD
-            
+
             <NavLink to="/dashboard/activity" className={linkClasses}>
               <Activity size={20} />
               <span className="font-medium">My Activity</span>
             </NavLink>
-            
+
             <NavLink to="/dashboard/active" className={linkClasses}>
               <Users size={20} />
               <span className="font-medium">Active Status</span>
             </NavLink>
-=======
-            <NavLink to="/dashboard/activity" className={linkClasses}>
-              <User size={20} />
-              <span className="font-medium">My Activity</span>
-            </NavLink>
->>>>>>> 270bc1ae19b568e3a652a09f65a92d1027cbffc3
           </nav>
 
           {/* Help Section */}
