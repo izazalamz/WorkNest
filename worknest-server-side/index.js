@@ -95,7 +95,12 @@ app.get("/health", (req, res) => {
   res.json({ success: true, message: "Server is running" });
 });
 
-// Routes
+// ===== MONGODB ROUTES (Custom Backend) =====
+// These handle attendance with MongoDB
+app.use("/api", attendanceRoutes);
+app.use("/api/notifications", notificationRoutes);
+
+// ===== OTHER CUSTOM ROUTES =====
 app.use(userRoutes);
 app.use("/dashboard", workspaceRoutes);
 app.use("/api", notificationRoutes);

@@ -6,8 +6,10 @@ import { Navigate } from "react-router";
 import BlockedProfile from "./BlockedProfile";
 
 const RequireProfileCompleted = ({ children }) => {
-  const { user } = use(AuthContext);
+  const { user, loading: authLoading } = use(AuthContext);
   const [profile, setProfile] = useState(null);
+  const [profileLoading, setProfileLoading] = useState(true);
+  const [error, setError] = useState(null);
 
   useEffect(() => {
     if (!user) return;
@@ -25,10 +27,13 @@ const RequireProfileCompleted = ({ children }) => {
   if (!profile.profileCompleted) {
     return <Navigate to="/complete-profile" />;
   }
+
+  // Show blocked screen if user is not active
   if (!profile.isActive) {
     return <BlockedProfile />;
   }
 
+  // All checks passed, render children
   return children;
 };
 
