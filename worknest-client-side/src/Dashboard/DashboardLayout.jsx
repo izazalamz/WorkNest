@@ -249,6 +249,7 @@ const DashboardLayout = () => {
             <NavLink to="/dashboard/nestboard" className={linkClasses} end>
               <LayoutDashboard size={20} />
               <span className="font-medium">NestBoard</span>
+            </NavLink>
 
             <NavLink to="/dashboard/desk-booking" className={linkClasses}>
               <MapPin size={20} />
@@ -304,23 +305,27 @@ const DashboardLayout = () => {
           </nav>
 
           {/* Help Section */}
-          <div className="mt-8 p-4 bg-gradient-to-br from-primary/5 to-primary/10 rounded-lg border border-primary/10">
-            <div className="flex items-start space-x-3 mb-3">
-              <HelpCircle className="w-5 h-5 text-primary flex-shrink-0 mt-0.5" />
-              <div>
-                <h3 className="text-sm font-semibold text-foreground">
-                  Need help?
-                </h3>
-                <p className="text-xs text-muted-foreground mt-1">
-                  Our support team is here 24/7
-                </p>
+          {role === "employee" && (
+            <div className="mt-8 p-4 bg-gradient-to-br from-primary/5 to-primary/10 rounded-lg border border-primary/10">
+              <div className="flex items-start space-x-3 mb-3">
+                <HelpCircle className="w-5 h-5 text-primary flex-shrink-0 mt-0.5" />
+                <div>
+                  <h3 className="text-sm font-semibold text-foreground">
+                    Need help?
+                  </h3>
+                  <p className="text-xs text-muted-foreground mt-1">
+                    Our support team is here 24/7
+                  </p>
+                </div>
               </div>
+              <NavLink
+                to={"/dashboard/support"}
+                className="flex items-center justify-center w-full py-2 text-sm font-medium text-primary hover:text-primary/80 transition-colors"
+              >
+                Contact Support
+              </NavLink>
             </div>
-            <button className="flex items-center justify-center w-full py-2 text-sm font-medium text-primary hover:text-primary/80 transition-colors">
-              Contact Support
-            </button>
-          </div>
-
+          )}
           {/* Logout Button */}
           <div className="mt-8 pt-6 border-t border-border">
             <button

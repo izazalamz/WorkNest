@@ -1,6 +1,7 @@
 import React, { useContext, useEffect, useMemo, useState } from "react";
 import TaskModal from "./TaskModal";
 import { AuthContext } from "../../contexts/AuthContext";
+import Loading from "../../components/Loading";
 
 const columns = [
   { key: "todo", title: "To-do" },
@@ -159,7 +160,7 @@ const NestBoard = () => {
   }
 
   if (loading) {
-    return <div className="p-6 text-gray-600">Loading board...</div>;
+    return <Loading />;
   }
 
   return (
@@ -214,11 +215,11 @@ const NestBoard = () => {
                   </span>
                 </div>
 
-                <div className="space-y-4 flex-1 overflow-y-auto pr-1">
+                <div className="space-y-4  rounded-lg  flex-1 overflow-y-auto ">
                   {colTasks.map((task) => (
                     <div
                       key={task._id}
-                      className="bg-white rounded-lg border border-gray-200 p-4"
+                      className="bg-white   rounded-lg border border-primary/40 p-4"
                     >
                       <div className="flex items-start justify-between gap-3">
                         <div className="min-w-0">
