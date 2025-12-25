@@ -2,13 +2,10 @@ const express = require("express");
 const cors = require("cors");
 const jsonServer = require("json-server");
 const connectDB = require("./config/db");
-<<<<<<< HEAD
 const http = require("http");
 const { Server } = require("socket.io");
 const socketHandler = require("./socket/socket");
 
-=======
->>>>>>> 86cef7a (Removes merge conflict markers and resolves code inconsistencies)
 const PORT = process.env.PORT || 3000;
 const userRoutes = require("./routes/userRoutes");
 const workspaceRoutes = require("./routes/workspaceRoutes");
@@ -29,7 +26,6 @@ const taskRoutes = require("./routes/taskRoutes");
 const chatRoutes = require("./routes/chatRoutes");
 
 const app = express();
-const server = http.createServer(app);
 
 // Socket.IO
 const io = new Server(server, {
@@ -46,7 +42,6 @@ socketHandler(io);
 connectDB();
 
 // Middleware - CORS with proper configuration
-<<<<<<< HEAD
 app.use(
   cors({
     origin: ["http://localhost:5173", "http://localhost:3000", "*"],
@@ -55,14 +50,6 @@ app.use(
     allowedHeaders: ["Content-Type", "Authorization"],
   })
 );
-=======
-app.use(cors({
-  origin: ['http://localhost:5173', 'http://localhost:3000', '*'],
-  credentials: true,
-  methods: ['GET', 'POST', 'PUT', 'DELETE', 'PATCH', 'OPTIONS'],
-  allowedHeaders: ['Content-Type', 'Authorization']
-}));
->>>>>>> 86cef7a (Removes merge conflict markers and resolves code inconsistencies)
 
 app.use(express.json({ limit: "50mb" }));
 app.use(express.urlencoded({ limit: "50mb", extended: true }));
@@ -87,6 +74,7 @@ app.get("/health", (req, res) => {
 // These handle attendance with MongoDB
 app.use("/api", attendanceRoutes);
 app.use("/api/notifications", notificationRoutes);
+<<<<<<< HEAD
 
 app.use(express.json({ limit: "50mb" }));
 app.use(express.urlencoded({ limit: "50mb", extended: true }));
@@ -143,7 +131,7 @@ app.use((err, req, res, next) => {
   });
 });
 =======
->>>>>>> 86cef7a (Removes merge conflict markers and resolves code inconsistencies)
+>>>>>>> f7782b38bedf3693ff050e7f2017583de336f85f
 
 // JSON SERVER ROUTES (For Users Data)
 // This serves your db.json file for user management
@@ -158,6 +146,7 @@ app.use(jsonRouter);
 // server run
 server.listen(PORT, () => {
   console.log(`Server + Socket.IO running on port ${PORT}`);
+});
 =======
 app.listen(PORT, () => {
   console.log(`\n✅ Unified Server running on port ${PORT}`);
@@ -165,5 +154,5 @@ app.listen(PORT, () => {
   console.log(`✅ JSON Server: /users, /bookings, etc.`);
   console.log(`✅ CORS enabled for http://localhost:5173`);
   console.log(`✅ Check health: http://localhost:${PORT}/health\n`);
->>>>>>> 86cef7a (Removes merge conflict markers and resolves code inconsistencies)
 });
+>>>>>>> f7782b38bedf3693ff050e7f2017583de336f85f

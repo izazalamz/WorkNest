@@ -55,4 +55,8 @@ AttendanceSchema.index(
 AttendanceSchema.index({ date: -1 });
 AttendanceSchema.index({ employeeId: 1, date: -1 });
 
+<<<<<<< HEAD
 module.exports = model("attendance", AttendanceSchema);
+=======
+module.exports = model("attendance", AttendanceSchema);
+>>>>>>> f7782b38bedf3693ff050e7f2017583de336f85f

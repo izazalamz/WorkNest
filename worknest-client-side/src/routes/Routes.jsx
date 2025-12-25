@@ -24,7 +24,7 @@ import NestBoard from "../Dashboard/Dashboardcomponents/NestBoard";
 import EmployeeSupportChat from "../Dashboard/Dashboardcomponents/EmployeeSupportChat";
 import AdminChatRoom from "../Dashboard/Dashboardcomponents/AdminChatRoom";
 =======
->>>>>>> 86cef7a (Removes merge conflict markers and resolves code inconsistencies)
+>>>>>>> f7782b38bedf3693ff050e7f2017583de336f85f
 
 export const router = createBrowserRouter([
   {
