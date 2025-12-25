@@ -17,7 +17,6 @@ const SignUp = () => {
   const [formData, setFormData] = useState({
     email: "",
     password: "",
-    name: "",
     agreeToTerms: false,
   });
 
@@ -64,11 +63,6 @@ const SignUp = () => {
       );
       const user = userCredential.user;
 
-      // Update user profile with display name
-      await updateUser({
-        displayName: formData.name,
-      });
-
       // Check if user exists in MongoDB (404 is expected for new users)
       let userExists = false;
       try {
@@ -92,7 +86,7 @@ const SignUp = () => {
         const createResponse = await axios.post("http://localhost:3000/users", {
           uid: user.uid,
           email: user.email,
-          name: formData.name || "",
+          name: "",
           profileCompleted: false,
         });
 
@@ -202,7 +196,6 @@ const SignUp = () => {
     return (
       formData.email &&
       formData.password &&
-      formData.name &&
       formData.agreeToTerms &&
       passwordRequirements.every((req) => req.met)
     );
@@ -257,25 +250,6 @@ const SignUp = () => {
                   </p>
 
                   <form onSubmit={handleSubmit}>
-                    {/* Name Field */}
-                    <div className="flex w-full flex-wrap items-end gap-4 pb-4">
-                      <label className="flex flex-col min-w-40 flex-1 w-full">
-                        <p className="text-foreground text-base font-medium leading-normal pb-2">
-                          Full Name
-                        </p>
-                        <input
-                          className="rounded-lg text-foreground outline-primary/50 bg-card h-14 placeholder:text-muted-foreground p-[15px] text-base border border-border focus:ring-2 focus:ring-primary/50 focus:border-transparent transition-colors duration-200"
-                          placeholder="Enter your full name"
-                          type="text"
-                          value={formData.name}
-                          onChange={(e) =>
-                            handleInputChange("name", e.target.value)
-                          }
-                          required
-                        />
-                      </label>
-                    </div>
-
                     {/* Email Field */}
                     <div className="flex w-full flex-wrap items-end gap-4 pb-4">
                       <label className="flex flex-col min-w-40 flex-1 w-full">
