@@ -1,4 +1,5 @@
 import { useState, useEffect, useContext, useRef } from "react";
+<<<<<<< HEAD
 import {
   Clock,
   Timer,
@@ -9,6 +10,9 @@ import {
   Building2,
   Home,
 } from "lucide-react";
+=======
+import { Clock, Timer, Calendar, User, LogIn, LogOut, Building2, Home } from "lucide-react";
+>>>>>>> f7782b38bedf3693ff050e7f2017583de336f85f
 import { AuthContext } from "../../contexts/AuthContext";
 import axios from "axios";
 
@@ -24,6 +28,7 @@ const MyActivity = () => {
   const [selectedWorkMode, setSelectedWorkMode] = useState(null);
   const hasRun = useRef(false);
 
+<<<<<<< HEAD
   const getToday = () => {
     const d = new Date();
     d.setHours(0, 0, 0, 0);
@@ -31,6 +36,9 @@ const MyActivity = () => {
   };
 
   const formatTime = (dateString) =>
+=======
+  const formatTime = dateString =>
+>>>>>>> f7782b38bedf3693ff050e7f2017583de336f85f
     dateString
       ? new Date(dateString).toLocaleTimeString([], {
           hour: "2-digit",
@@ -42,12 +50,20 @@ const MyActivity = () => {
 
   const fetchUserData = async () => {
     try {
+<<<<<<< HEAD
       const response = await axios.get(
         `http://localhost:3000/users/${user.uid}`
       );
       setUserData(response.data.user);
       return response.data.user;
     } catch {
+=======
+      const response = await axios.get(`http://localhost:3000/users/${user.uid}`);
+      setUserData(response.data.users);
+      return response.data.users;
+    } catch (err) {
+      console.error("Error fetching user data:", err);
+>>>>>>> f7782b38bedf3693ff050e7f2017583de336f85f
       setError("Failed to load user data");
       return {};
     }
@@ -176,13 +192,21 @@ const MyActivity = () => {
           console.log("🔄 Refreshing attendance data after check-in...");
           await fetchAttendanceData();
         }, 500);
+<<<<<<< HEAD
 
+=======
+        
+>>>>>>> f7782b38bedf3693ff050e7f2017583de336f85f
         setTimeout(() => setSuccess(""), 3000);
       }
     } catch (error) {
       console.error("❌ Check-in failed:", error);
       console.error("Response data:", error.response?.data);
+<<<<<<< HEAD
 
+=======
+      
+>>>>>>> f7782b38bedf3693ff050e7f2017583de336f85f
       if (error.response?.data?.message === "Already checked in today") {
         setError("Already checked in today.");
       } else {
@@ -213,6 +237,7 @@ const MyActivity = () => {
 
       console.log("🔴 Sending check-out request...");
       console.log("📝 Current status before checkout:", currentStatus);
+<<<<<<< HEAD
 
       const response = await axios.put(
         "http://localhost:3000/api/attendance/checkout",
@@ -221,6 +246,13 @@ const MyActivity = () => {
         }
       );
 
+=======
+      
+      const response = await axios.put("http://localhost:3000/api/attendance/checkout", {
+        employeeId: user.uid,
+      });
+
+>>>>>>> f7782b38bedf3693ff050e7f2017583de336f85f
       console.log("✅ Check-out response:", response.data);
 
       if (response.data.success) {
@@ -234,7 +266,11 @@ const MyActivity = () => {
           console.log("🔄 Refreshing attendance data after check-out...");
           await fetchAttendanceData();
         }, 500);
+<<<<<<< HEAD
 
+=======
+        
+>>>>>>> f7782b38bedf3693ff050e7f2017583de336f85f
         setTimeout(() => setSuccess(""), 3000);
       }
     } catch (error) {
@@ -310,7 +346,11 @@ const MyActivity = () => {
 
       <div className="bg-card border border-border rounded-lg p-6">
         <h2 className="text-lg font-semibold mb-4">Today's Status</h2>
+<<<<<<< HEAD
 
+=======
+        
+>>>>>>> f7782b38bedf3693ff050e7f2017583de336f85f
         {/* Work Mode Selection */}
         {!currentStatus?.checkInTime && (
           <div className="mb-6">
@@ -417,6 +457,7 @@ const MyActivity = () => {
         <div className="flex gap-4">
           <button
             onClick={handleCheckIn}
+<<<<<<< HEAD
             disabled={
               buttonLoading ||
               currentStatus?.checkInTime ||
@@ -433,6 +474,13 @@ const MyActivity = () => {
               : !selectedWorkMode
               ? "Select Work Mode"
               : "Check In"}
+=======
+            disabled={buttonLoading || currentStatus?.checkInTime || !userData.name || !selectedWorkMode}
+            className="flex-1 bg-green-600 hover:bg-green-700 disabled:bg-gray-400 text-white font-medium py-3 px-4 rounded-lg transition flex items-center justify-center gap-2"
+          >
+            <LogIn className="w-5 h-5" />
+            {buttonLoading ? "Processing..." : !userData.name ? "Loading..." : !selectedWorkMode ? "Select Work Mode" : "Check In"}
+>>>>>>> f7782b38bedf3693ff050e7f2017583de336f85f
           </button>
           <button
             onClick={handleCheckOut}
@@ -468,22 +516,31 @@ const MyActivity = () => {
               <tr className="border-b border-border">
                 <th className="text-left py-3 px-4 font-medium">Date</th>
                 <th className="text-left py-3 px-4 font-medium">Work Mode</th>
+<<<<<<< HEAD
                 <th className="text-left py-3 px-4 font-medium">
                   Check-in Time
                 </th>
                 <th className="text-left py-3 px-4 font-medium">
                   Check-out Time
                 </th>
+=======
+                <th className="text-left py-3 px-4 font-medium">Check-in Time</th>
+                <th className="text-left py-3 px-4 font-medium">Check-out Time</th>
+>>>>>>> f7782b38bedf3693ff050e7f2017583de336f85f
                 <th className="text-left py-3 px-4 font-medium">Total Hours</th>
               </tr>
             </thead>
             <tbody>
               {attendanceData.length === 0 ? (
                 <tr>
+<<<<<<< HEAD
                   <td
                     colSpan="5"
                     className="text-center py-8 text-muted-foreground"
                   >
+=======
+                  <td colSpan="5" className="text-center py-8 text-muted-foreground">
+>>>>>>> f7782b38bedf3693ff050e7f2017583de336f85f
                     No attendance records found
                   </td>
                 </tr>
@@ -513,6 +570,7 @@ const MyActivity = () => {
                         )}
                       </div>
                     </td>
+<<<<<<< HEAD
                     <td className="py-3 px-4">
                       {formatTime(record.checkInTime)}
                     </td>
@@ -524,6 +582,11 @@ const MyActivity = () => {
                         ? `${record.totalHours.toFixed(2)} hrs`
                         : "-"}
                     </td>
+=======
+                    <td className="py-3 px-4">{formatTime(record.checkInTime)}</td>
+                    <td className="py-3 px-4">{formatTime(record.checkOutTime)}</td>
+                    <td className="py-3 px-4">{record.totalHours ? `${record.totalHours.toFixed(2)} hrs` : "-"}</td>
+>>>>>>> f7782b38bedf3693ff050e7f2017583de336f85f
                   </tr>
                 ))
               )}

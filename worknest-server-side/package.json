@@ -5,6 +5,10 @@
   "main": "index.js",
   "scripts": {
     "start": "nodemon index.js",
+<<<<<<< HEAD
+=======
+    "dev": "nodemon index.js",
+>>>>>>> f7782b38bedf3693ff050e7f2017583de336f85f
     "test": "echo \"Error: no test specified\" && exit 1",
     "seed:analytics": "node seed/seedAnalyticsData.js"
   },
