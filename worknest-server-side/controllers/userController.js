@@ -36,11 +36,7 @@ const getSingleUser = async (req, res) => {
 
     res.status(200).json({
       success: true,
-<<<<<<< HEAD
       user: singleUser,
-=======
-      users: singleUser,
->>>>>>> f7782b38bedf3693ff050e7f2017583de336f85f
     });
   } catch (error) {
     console.error("Error fetching user:", error);
@@ -255,8 +251,4 @@ module.exports = {
   updateUser,
   deleteUser,
   getAdminUser,
-<<<<<<< HEAD
 };
-=======
-};
->>>>>>> f7782b38bedf3693ff050e7f2017583de336f85f

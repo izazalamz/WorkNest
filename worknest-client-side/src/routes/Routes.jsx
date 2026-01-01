@@ -18,13 +18,17 @@ import About from "../pages/About";
 import AllUsers from "../Dashboard/Dashboardcomponents/AllUsers";
 import ManageWorkspace from "../Dashboard/Dashboardcomponents/ManageWorkspace";
 import MyActivity from "../Dashboard/Dashboardcomponents/MyActivity";
-import ShowActive from "../Dashboard/Dashboardcomponents/Showactive";
-<<<<<<< HEAD
+import ShowActive from "../Dashboard/Dashboardcomponents/ShowActive";
 import NestBoard from "../Dashboard/Dashboardcomponents/NestBoard";
 import EmployeeSupportChat from "../Dashboard/Dashboardcomponents/EmployeeSupportChat";
 import AdminChatRoom from "../Dashboard/Dashboardcomponents/AdminChatRoom";
-=======
->>>>>>> f7782b38bedf3693ff050e7f2017583de336f85f
+
+// NEW: Guest Mode Components
+import GuestRequest from "../pages/GuestRequest";
+import GuestVerify from "../pages/GuestVerify";
+import DemoDashboardLayout from "../Dashboard/DemoDashboardLayout";
+import DemoDashboard from "../Dashboard/DemoDashboard";
+import GuestManagement from "../Dashboard/Dashboardcomponents/GuestManagement";
 
 export const router = createBrowserRouter([
   {
@@ -53,6 +57,14 @@ export const router = createBrowserRouter([
         path: "/complete-profile",
         Component: CompleteProfile,
       },
+      {
+        path: "/guest-request",
+        Component: GuestRequest,
+      },
+      {
+        path: "/guest-verify/:token",
+        Component: GuestVerify,
+      },
     ],
   },
   {
@@ -71,7 +83,6 @@ export const router = createBrowserRouter([
         path: "/dashboard/nestboard",
         Component: NestBoard,
       },
-
       {
         path: "/dashboard/add-workspace",
         Component: AddWorkspace,
@@ -104,6 +115,11 @@ export const router = createBrowserRouter([
         path: "/dashboard/allusers",
         Component: AllUsers,
       },
+      // NEW: Guest Management for Admins
+      {
+        path: "/dashboard/guest-management",
+        Component: GuestManagement,
+      },
       {
         path: "/dashboard/analytics",
         Component: Analytics,
@@ -119,6 +135,17 @@ export const router = createBrowserRouter([
       {
         path: "/dashboard/active",
         Component: ShowActive,
+      },
+    ],
+  },
+  // NEW: Demo Dashboard Routes
+  {
+    path: "/demo-dashboard",
+    Component: DemoDashboardLayout,
+    children: [
+      {
+        index: true,
+        Component: DemoDashboard,
       },
     ],
   },

@@ -95,11 +95,7 @@ const getActiveTodayUsers = async (req, res) => {
     return res.status(500).json({
       success: false,
       message: "Failed to fetch active users",
-<<<<<<< HEAD
       error: process.env.NODE_ENV === "development" ? error.message : undefined,
-=======
-      error: process.env.NODE_ENV === 'development' ? error.message : undefined
->>>>>>> f7782b38bedf3693ff050e7f2017583de336f85f
     });
   }
 };
@@ -230,34 +226,12 @@ const checkOut = async (req, res) => {
     console.log("EmployeeId:", employeeId);
 
     if (!employeeId) {
-<<<<<<< HEAD
       return res.status(400).json({
-=======
-      return res.status(400).json({ 
-        success: false, 
-        message: 'Missing employeeId' 
-      });
-    }
-
-    const day = new Date();
-    day.setUTCHours(0, 0, 0, 0);
-
-    // Find today's check-in record using correct field names
-    const attendance = await Attendance.findOne({
-      employeeId: employeeId,
-      date: day,
-    });
-
-    if (!attendance) {
-      console.log('❌ No check-in record found for today');
-      return res.status(404).json({
->>>>>>> f7782b38bedf3693ff050e7f2017583de336f85f
         success: false,
         message: "Missing employeeId",
       });
     }
 
-<<<<<<< HEAD
     const day = new Date();
     day.setUTCHours(0, 0, 0, 0);
 
@@ -280,13 +254,6 @@ const checkOut = async (req, res) => {
       return res.status(200).json({
         success: true,
         message: "Already checked out",
-=======
-    if (attendance.checkOutTime) {
-      console.log('⚠️ Already checked out:', attendance);
-      return res.status(200).json({
-        success: true,
-        message: 'Already checked out',
->>>>>>> f7782b38bedf3693ff050e7f2017583de336f85f
         attendance: attendance,
       });
     }
@@ -300,11 +267,7 @@ const checkOut = async (req, res) => {
     console.log("✅ Check-out successful:", attendance);
     return res.status(200).json({
       success: true,
-<<<<<<< HEAD
       message: "Check-out successful",
-=======
-      message: 'Check-out successful',
->>>>>>> f7782b38bedf3693ff050e7f2017583de336f85f
       attendance: attendance,
     });
   } catch (err) {
@@ -395,15 +358,11 @@ const getTotalHours = async (req, res) => {
       return sum + (record.totalHours || 0);
     }, 0);
 
-<<<<<<< HEAD
     console.log(
       ` Total hours: ${totalHours.toFixed(2)} from ${
         attendanceRecords.length
       } records`
     );
-=======
-    console.log(`✅ Total hours: ${totalHours.toFixed(2)} from ${attendanceRecords.length} records`);
->>>>>>> f7782b38bedf3693ff050e7f2017583de336f85f
 
     return res.status(200).json({
       success: true,
@@ -429,8 +388,4 @@ module.exports = {
   getAttendance,
   getTotalHours,
   getActiveTodayUsers,
-<<<<<<< HEAD
 };
-=======
-};
->>>>>>> f7782b38bedf3693ff050e7f2017583de336f85f

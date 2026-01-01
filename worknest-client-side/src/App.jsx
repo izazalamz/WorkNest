@@ -14,7 +14,7 @@ import Profile from "./Dashboard/Dashboardcomponents/Profile";
 import MyBookings from "./Dashboard/Dashboardcomponents/MyBookings";
 import Analytics from "./Dashboard/Dashboardcomponents/Analytics";
 import MyActivity from "./Dashboard/Dashboardcomponents/MyActivity";
-import ShowActive from "./Dashboard/Dashboardcomponents/ShowActive";
+import ShowActive from "./Dashboard/Dashboardcomponents/ShowActive.jsx";
 
 import AuthProvider from "./contexts/AuthProvider";
 import { NotificationProvider } from "./contexts/NotificationContext.jsx";
