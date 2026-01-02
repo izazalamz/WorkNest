@@ -1,5 +1,6 @@
 const Workspace = require("../models/workspaceModel");
 
+// ✅ Create a new workspace
 const createWorkspace = async (req, res) => {
   try {
     const {
@@ -33,22 +34,19 @@ const createWorkspace = async (req, res) => {
       status: status || "active",
     });
 
+    console.log("this is workspace", newWorkspace);
     await newWorkspace.save();
 
-    res.status(201).json({
-      success: true,
-      message: "Workspace created successfully",
+    res.status(200).json({
       workspace: newWorkspace,
     });
   } catch (error) {
-    console.error("Create workspace error:", error);
-    res.status(500).json({
-      success: false,
-      message: "Failed to create workspace",
-    });
+    console.log(error);
+    res.status(500).json({ message: "Failed to create workspace" });
   }
 };
 
+// ✅ Get all workspaces
 const getAllWorkspaces = async (req, res) => {
   try {
     const allWorkspaces = await Workspace.find();
@@ -58,32 +56,33 @@ const getAllWorkspaces = async (req, res) => {
     });
   } catch (error) {
     console.log(error);
+    res.status(500).json({ message: "Failed to fetch workspaces" });
   }
 };
 
-// Update workspace
-const updateWorkspace = async (req, res) => {
+// ✅ Update workspace status + startAt/endAt/Google event
+const updateWorkspaceStatus = async (req, res) => {
   try {
     const { id } = req.params;
+    const { status, startAt, endAt, googleEventId } = req.body; // added startAt, endAt, googleEventId
 
-    const updatedWorkspace = await Workspace.findByIdAndUpdate(id, req.body, {
-      new: true,
+    const updatedWorkspace = await Workspace.findByIdAndUpdate(
+      id,
+      { status, startAt, endAt, googleEventId }, // update all fields
+      { new: true }
+    );
+
+    if (!updatedWorkspace) {
+      return res.status(404).json({ message: "Workspace not found" });
+    }
+
+    res.status(200).json({
+      success: true,
+      workspace: updatedWorkspace,
     });
-
-    res.status(200).json({ workspace: updatedWorkspace });
   } catch (error) {
-    res.status(400).json({ message: "Failed to update workspace" });
-  }
-};
-
-// Delete workspace
-const deleteWorkspace = async (req, res) => {
-  try {
-    const { id } = req.params;
-    await Workspace.findByIdAndDelete(id);
-    res.status(200).json({ message: "Workspace deleted successfully" });
-  } catch (error) {
-    res.status(400).json({ message: "Failed to delete workspace" });
+    console.error("Update workspace error:", error);
+    res.status(500).json({ message: "Failed to update workspace status" });
   }
 };
 
@@ -92,4 +91,5 @@ module.exports = {
   getAllWorkspaces,
   updateWorkspace,
   deleteWorkspace,
+  updateWorkspaceStatus,
 };

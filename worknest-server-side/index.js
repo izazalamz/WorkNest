@@ -6,7 +6,13 @@ const userRoutes = require("./routes/userRoutes");
 const workspaceRoutes = require("./routes/workspaceRoutes");
 const analyticsRoutes = require("./routes/analyticsRoutes");
 const notificationRoutes = require("./routes/notificationRoutes");
-const attendanceRoutes = require("./routes/attendanceRoutes");
+
+const bookingRoute = require("./routes/bookingRoute");
+
+const { expireBookings } = require("./controllers/bookingController");
+
+
+const port = process.env.PORT || 3000;
 
 const app = express();
 
@@ -17,16 +23,25 @@ connectDB();
 app.use(cors());
 app.use(express.json());
 
-// Routes
-app.use("/api", userRoutes);
-app.use("/api", workspaceRoutes);
-app.use("/api", notificationRoutes);
-app.use("/api", attendanceRoutes);
+// Connect to Database
+connectDB();
+  setInterval(expireBookings, 60 * 1000);
+
+app.get("/", (req, res) => {
+  res.send("WorkNest - Optimize Your Hybrid Workspace Effortlessly");
+});
+
+// all routes for users
+app.use(userRoutes);
+
+// all routes for wrokspace -
+app.use("/dashboard", workspaceRoutes); // api endpoint --> /dashboard/routes
 
 // all routes for analytics
 app.use("/dashboard", analyticsRoutes);
 // all routes for notifications
 app.use("/api/notifications", notificationRoutes);
+app.use("/api/bookings", bookingRoute);
 
 app.listen(PORT, () => {
   console.log(`Server running on port ${PORT}`);

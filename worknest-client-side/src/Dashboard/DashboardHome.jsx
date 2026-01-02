@@ -351,7 +351,7 @@ const DashboardHome = () => {
                 Your Upcoming Bookings
               </h2>
               <Link
-                to="/dashboard/desk-booking"
+                to="/dashboard/my-bookings"
                 className="text-sm font-medium text-primary hover:text-primary/80 transition-colors flex items-center"
               >
                 View All <ArrowRight className="w-4 h-4 ml-1" />
