@@ -23,7 +23,7 @@ const bookingSchema = new mongoose.Schema(
     // Booking lifecycle status
     status: {
       type: String,
-      enum: ["confirmed", "cancelled", "expired", "completed"],
+      enum: ["confirmed", "cancelled", "expired", "completed", "no_show", "checked_in"],
       default: "confirmed",
     },
 

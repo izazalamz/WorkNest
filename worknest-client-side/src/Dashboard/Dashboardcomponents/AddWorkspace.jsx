@@ -70,7 +70,7 @@ const AddWorkspace = () => {
 
     setLoading(true);
     try {
-      await axios.post("http://localhost:3000/api/dashboard/workspace", formData);
+      await axios.post("http://localhost:3000/dashboard/workspace", formData);
       navigate("/dashboard");
     } catch (err) {
       console.error(err);

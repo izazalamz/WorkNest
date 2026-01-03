@@ -189,16 +189,6 @@ export default function WeatherWidget() {
             {data?.name && ` • ${data.name}`}
           </p>
         </div>
-
-        <button
-          onClick={handleRefresh}
-          className="p-2 hover:bg-muted rounded-lg transition-colors"
-          disabled={loading}
-        >
-          <RefreshCw
-            className={`w-5 h-5 text-primary ${loading ? "animate-spin" : ""}`}
-          />
-        </button>
       </div>
 
       {/* Weather Data */}

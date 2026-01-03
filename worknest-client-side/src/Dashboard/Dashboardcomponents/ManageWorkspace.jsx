@@ -32,8 +32,8 @@ const ManageWorkspace = () => {
 
   const fetchWorkspaces = async () => {
     try {
-      const res = await axios.get("http://localhost:3000/api/dashboard/workspace");
-      setWorkspaces(res.data.workspaces);
+      const res = await axios.get("http://localhost:3000/dashboard/workspace");
+      setWorkspaces(res.data.workspaces || []);
     } catch (err) {
       console.error(err);
     } finally {
@@ -59,7 +59,7 @@ const ManageWorkspace = () => {
   const handleUpdate = async () => {
     try {
       await axios.put(
-        `http://localhost:3000/api/dashboard/workspace/${selectedWorkspace._id}`,
+        `http://localhost:3000/dashboard/workspace/${selectedWorkspace._id}`,
         {
           name: formData.name,
           type: formData.type,
@@ -84,7 +84,7 @@ const ManageWorkspace = () => {
   const handleDelete = async (id) => {
     if (!confirm("Are you sure you want to delete this workspace?")) return;
     try {
-      await axios.delete(`http://localhost:3000/api/dashboard/workspace/${id}`);
+      await axios.delete(`http://localhost:3000/dashboard/workspace/${id}`);
       fetchWorkspaces();
     } catch (err) {
       console.error(err);

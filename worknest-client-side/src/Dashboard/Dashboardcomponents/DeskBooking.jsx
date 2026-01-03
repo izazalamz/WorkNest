@@ -1,12 +1,10 @@
-import React, { useEffect, useState } from "react";
+import React, { useEffect, useState, useContext } from "react";
 import axios from "axios";
-
-/* 🔐 GOOGLE CONFIG */
-const CLIENT_ID = import.meta.env.VITE_GOOGLE_CLIENT_ID;
-const API_KEY = import.meta.env.VITE_GOOGLE_API_KEY;
-const SCOPES = "https://www.googleapis.com/auth/calendar.events";
+import { toast } from "react-toastify";
+import { AuthContext } from "../../contexts/AuthContext";
 
 const DeskBooking = () => {
+  const { user } = useContext(AuthContext);
   const [desks, setDesks] = useState([]);
   const [loading, setLoading] = useState(true);
 
@@ -16,56 +14,29 @@ const DeskBooking = () => {
   const [bookingData, setBookingData] = useState({
     date: "",
     startTime: "",
-    startPeriod: "AM",
     endTime: "",
-    endPeriod: "AM",
   });
-
-  const [gapiReady, setGapiReady] = useState(false);
-
-  /* ---------------- Load Google APIs ---------------- */
-  useEffect(() => {
-    const loadScript = (src) =>
-      new Promise((resolve) => {
-        const script = document.createElement("script");
-        script.src = src;
-        script.async = true;
-        script.defer = true;
-        script.onload = resolve;
-        document.body.appendChild(script);
-      });
-
-    const initGapi = async () => {
-      await loadScript("https://accounts.google.com/gsi/client");
-      await loadScript("https://apis.google.com/js/api.js");
-
-      window.gapi.load("client", async () => {
-        await window.gapi.client.init({
-          apiKey: API_KEY,
-          discoveryDocs: [
-            "https://www.googleapis.com/discovery/v1/apis/calendar/v3/rest",
-          ],
-        });
-        setGapiReady(true);
-      });
-    };
-
-    initGapi();
-  }, []);
 
   /* ---------------- Fetch desks ---------------- */
   useEffect(() => {
     const fetchDesks = async () => {
       try {
-        const res = await axios.get("http://localhost:3000/dashboard/workspaces");
+        const res = await axios.get("http://localhost:3000/dashboard/workspace");
 
-        const deskList = (res.data.workspaces || []).filter(
-          (d) => d.type === "desk" && d.status === "active"
+        // Backend returns { success: true, workspaces: [...] }
+        const allWorkspaces = res.data.workspaces || [];
+        console.log("All workspaces from API:", allWorkspaces);
+        
+        // Filter for desks - show active desks, or all desks if status filter is too strict
+        const deskList = allWorkspaces.filter(
+          (d) => d.type === "desk" && (d.status === "active" || !d.status)
         );
 
+        console.log("Filtered desk list:", deskList);
         setDesks(deskList);
       } catch (err) {
-        console.error(err);
+        console.error("Error fetching desks:", err);
+        console.error("Response:", err.response?.data);
       } finally {
         setLoading(false);
       }
@@ -82,86 +53,41 @@ const DeskBooking = () => {
   const handleSubmit = async (e, desk) => {
     e.preventDefault();
 
-    if (!gapiReady || !window.google) {
-      alert("Google API still loading");
-      return;
+    try {
+      // Time input already provides 24-hour format (HH:MM)
+      const [startHours, startMinutes] = bookingData.startTime.split(":").map(Number);
+      const [endHours, endMinutes] = bookingData.endTime.split(":").map(Number);
+
+      const start = new Date(bookingData.date);
+      start.setHours(startHours, startMinutes, 0, 0);
+
+      const end = new Date(bookingData.date);
+      end.setHours(endHours, endMinutes, 0, 0);
+
+      const now = new Date();
+      if (start < now) {
+        toast.error("You can only book for the present or future time.");
+        return;
+      }
+
+      // ---------- POST booking to backend (no Google Calendar) ----------
+      await axios.post("http://localhost:3000/api/bookings", {
+        workspaceId: desk._id,
+        startAt: start.toISOString(),
+        endAt: end.toISOString(),
+        uid: user?.uid, // Send user UID for proper booking association
+      });
+
+      // If we reach here, booking was successful
+      // ---------- Update frontend ----------
+      setDesks((prev) => prev.filter((d) => d._id !== desk._id));
+      setBookingDesk(null);
+      toast.success("Desk booked successfully!");
+    } catch (err) {
+      console.error("Booking error:", err);
+      const errorMessage = err.response?.data?.message || err.message || "Booking failed";
+      toast.error(errorMessage);
     }
-
-    const tokenClient = window.google.accounts.oauth2.initTokenClient({
-      client_id: CLIENT_ID,
-      scope: SCOPES,
-      callback: async (tokenResponse) => {
-        try {
-          window.gapi.client.setToken(tokenResponse);
-
-          // ---------- Convert input type="time" + AM/PM to correct hours ----------
-          const [startHoursRaw, startMinutes] = bookingData.startTime
-            .split(":")
-            .map(Number);
-          const [endHoursRaw, endMinutes] = bookingData.endTime
-            .split(":")
-            .map(Number);
-
-          let startHours = startHoursRaw;
-          let endHours = endHoursRaw;
-
-          if (bookingData.startPeriod === "PM" && startHours !== 12) startHours += 12;
-          if (bookingData.startPeriod === "AM" && startHours === 12) startHours = 0;
-
-          if (bookingData.endPeriod === "PM" && endHours !== 12) endHours += 12;
-          if (bookingData.endPeriod === "AM" && endHours === 12) endHours = 0;
-
-          const start = new Date(bookingData.date);
-          start.setHours(startHours, startMinutes, 0, 0);
-
-          const end = new Date(bookingData.date);
-          end.setHours(endHours, endMinutes, 0, 0);
-
-          const now = new Date();
-          if (start < now) {
-            alert("❌ You can only book for the present or future time.");
-            return;
-          }
-
-          // ---------- Google Calendar Event ----------
-          const event = {
-            summary: `Desk Booking - ${desk.name}`,
-            start: {
-              dateTime: start.toISOString(),
-              timeZone: Intl.DateTimeFormat().resolvedOptions().timeZone,
-            },
-            end: {
-              dateTime: end.toISOString(),
-              timeZone: Intl.DateTimeFormat().resolvedOptions().timeZone,
-            },
-          };
-
-          const insertRes = await window.gapi.client.calendar.events.insert({
-            calendarId: "primary",
-            resource: event,
-          });
-
-          // ---------- POST booking to backend ----------
-          await axios.post("http://localhost:3000/api/bookings", {
-            workspaceId: desk._id,
-            startAt: start.toISOString(),
-            endAt: end.toISOString(),
-            googleEventId: insertRes.result.id,
-          });
-
-          // ---------- Update frontend ----------
-          setDesks((prev) => prev.filter((d) => d._id !== desk._id));
-          setBookingDesk(null);
-
-          alert("✅ Desk booked successfully");
-        } catch (err) {
-          console.error(err);
-          alert("❌ Booking failed");
-        }
-      },
-    });
-
-    tokenClient.requestAccessToken();
   };
 
   if (loading) return <p className="text-center mt-10">Loading desks...</p>;
@@ -259,38 +185,26 @@ const DeskBooking = () => {
                 className="w-full border px-3 py-2 rounded"
               />
 
-              <div className="flex gap-2">
-                <input
-                  type="time"
-                  name="startTime"
-                  min={
-                    bookingData.date === new Date().toISOString().split("T")[0]
-                      ? new Date().toTimeString().slice(0, 5)
-                      : undefined
-                  }
-                  required
-                  onChange={handleChange}
-                  className="flex-1 border px-3 py-2 rounded"
-                />
-                <select name="startPeriod" onChange={handleChange} className="border px-2 rounded">
-                  <option>AM</option>
-                  <option>PM</option>
-                </select>
-              </div>
+              <input
+                type="time"
+                name="startTime"
+                min={
+                  bookingData.date === new Date().toISOString().split("T")[0]
+                    ? new Date().toTimeString().slice(0, 5)
+                    : undefined
+                }
+                required
+                onChange={handleChange}
+                className="w-full border px-3 py-2 rounded"
+              />
 
-              <div className="flex gap-2">
-                <input
-                  type="time"
-                  name="endTime"
-                  required
-                  onChange={handleChange}
-                  className="flex-1 border px-3 py-2 rounded"
-                />
-                <select name="endPeriod" onChange={handleChange} className="border px-2 rounded">
-                  <option>AM</option>
-                  <option>PM</option>
-                </select>
-              </div>
+              <input
+                type="time"
+                name="endTime"
+                required
+                onChange={handleChange}
+                className="w-full border px-3 py-2 rounded"
+              />
 
               <button type="submit" className="w-full rounded bg-green-600 py-2 text-white">
                 Confirm Booking

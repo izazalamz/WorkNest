@@ -210,7 +210,6 @@ const DashboardLayout = () => {
       </header>
 
       <div className="flex flex-1 relative">
-        {/* Toggle button for sidebar (Mobile) - Alternative */}
         {!sidebarOpen && (
           <button
             className="md:hidden p-4 absolute top-2 left-2 z-30 text-primary bg-card rounded-lg shadow"
@@ -227,7 +226,6 @@ const DashboardLayout = () => {
           ${sidebarOpen ? "translate-x-0" : "-translate-x-full"} 
           md:relative md:translate-x-0 md:flex md:flex-col`}
         >
-          {/* Close button inside sidebar (mobile only) */}
           <div className="flex justify-between items-center mb-8 md:hidden">
             <div className="flex items-center space-x-3">
               <div className="w-10 h-10 rounded-xl bg-gradient-to-br from-primary to-primary/80 flex items-center justify-center">
@@ -244,7 +242,7 @@ const DashboardLayout = () => {
 
           {/* Navigation */}
           <nav className="space-y-2 flex-1">
-            {/* Common Links - Show to Everyone */}
+            {/* Common Links */}
             <NavLink to="/dashboard" className={linkClasses} end>
               <LayoutDashboard size={20} />
               <span className="font-medium">Dashboard</span>
@@ -255,28 +253,19 @@ const DashboardLayout = () => {
               <span className="font-medium">NestBoard</span>
             </NavLink>
 
-            <NavLink to="/dashboard/desk-booking" className={linkClasses}>
-              <MapPin size={20} />
-              <span className="font-medium">Desk Booking</span>
-            </NavLink>
-            <NavLink to="/dashboard/meeting-rooms" className={linkClasses}>
-              <Calendar size={20} />
-              <span className="font-medium">Meeting Rooms</span>
-            </NavLink>
-            <NavLink to="/dashboard/my-bookings" className={linkClasses}>
-              <Users size={20} />
-              <span className="font-medium">My Bookings</span>
-            </NavLink>
-            {role === "employee" && (
+            {/* ✅ Employee-only Links - Show for employees (default to showing unless explicitly admin) */}
+            {role !== "admin" && (
               <>
                 <NavLink to="/dashboard/desk-booking" className={linkClasses}>
                   <MapPin size={20} />
                   <span className="font-medium">Desk Booking</span>
                 </NavLink>
+
                 <NavLink to="/dashboard/meeting-rooms" className={linkClasses}>
                   <Calendar size={20} />
                   <span className="font-medium">Meeting Rooms</span>
                 </NavLink>
+
                 <NavLink to="/dashboard/my-bookings" className={linkClasses}>
                   <Users size={20} />
                   <span className="font-medium">My Bookings</span>
@@ -291,7 +280,10 @@ const DashboardLayout = () => {
                   <Users size={20} />
                   <span className="font-medium">All Users</span>
                 </NavLink>
-                <NavLink to="/dashboard/guest-management" className={linkClasses}>
+                <NavLink
+                  to="/dashboard/guest-management"
+                  className={linkClasses}
+                >
                   <UserCheck size={20} />
                   <span className="font-medium">Guest Management</span>
                 </NavLink>
@@ -299,7 +291,10 @@ const DashboardLayout = () => {
                   <PlusSquare size={20} />
                   <span className="font-medium">Add Workspace</span>
                 </NavLink>
-                <NavLink to="/dashboard/manage-workspace" className={linkClasses}>
+                <NavLink
+                  to="/dashboard/manage-workspace"
+                  className={linkClasses}
+                >
                   <Settings size={20} />
                   <span className="font-medium">Manage Workspace</span>
                 </NavLink>
@@ -314,7 +309,7 @@ const DashboardLayout = () => {
               </>
             )}
 
-            {/* Common Links - Show to Everyone */}
+            {/* Common Links - still for everyone */}
             <NavLink to="/dashboard/profile" className={linkClasses}>
               <User size={20} />
               <span className="font-medium">My Profile</span>
@@ -364,7 +359,6 @@ const DashboardLayout = () => {
           </div>
         </aside>
 
-        {/* Backdrop (Mobile) */}
         {sidebarOpen && (
           <div
             className="fixed inset-0 bg-black/40 z-20 md:hidden"
@@ -372,10 +366,8 @@ const DashboardLayout = () => {
           />
         )}
 
-        {/* Main Content */}
         <main className="flex-1 px-4 md:px-6 lg:px-8 py-6 overflow-x-hidden">
           <div className="max-w-full">
-            {/* Page Content */}
             <div className="bg-card border border-border rounded-xl p-6">
               <Outlet />
             </div>
