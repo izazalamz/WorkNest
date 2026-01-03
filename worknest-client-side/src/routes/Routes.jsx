@@ -23,7 +23,7 @@ import NestBoard from "../Dashboard/Dashboardcomponents/NestBoard";
 import EmployeeSupportChat from "../Dashboard/Dashboardcomponents/EmployeeSupportChat";
 import AdminChatRoom from "../Dashboard/Dashboardcomponents/AdminChatRoom";
 
-// NEW: Guest Mode Components
+// Guest Mode Components
 import GuestRequest from "../pages/GuestRequest";
 import GuestVerify from "../pages/GuestVerify";
 import DemoDashboardLayout from "../Dashboard/DemoDashboardLayout";
@@ -138,7 +138,7 @@ export const router = createBrowserRouter([
       },
     ],
   },
-  // NEW: Demo Dashboard Routes
+  // Demo Dashboard Routes
   {
     path: "/demo-dashboard",
     Component: DemoDashboardLayout,

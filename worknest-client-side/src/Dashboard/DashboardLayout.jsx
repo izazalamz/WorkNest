@@ -255,7 +255,18 @@ const DashboardLayout = () => {
               <span className="font-medium">NestBoard</span>
             </NavLink>
 
-            {/* Employee-Only Links */}
+            <NavLink to="/dashboard/desk-booking" className={linkClasses}>
+              <MapPin size={20} />
+              <span className="font-medium">Desk Booking</span>
+            </NavLink>
+            <NavLink to="/dashboard/meeting-rooms" className={linkClasses}>
+              <Calendar size={20} />
+              <span className="font-medium">Meeting Rooms</span>
+            </NavLink>
+            <NavLink to="/dashboard/my-bookings" className={linkClasses}>
+              <Users size={20} />
+              <span className="font-medium">My Bookings</span>
+            </NavLink>
             {role === "employee" && (
               <>
                 <NavLink to="/dashboard/desk-booking" className={linkClasses}>

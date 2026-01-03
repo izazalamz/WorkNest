@@ -5,8 +5,6 @@ const connectDB = require("./config/db");
 const http = require("http");
 const { Server } = require("socket.io");
 const socketHandler = require("./socket/socket");
-
-const PORT = process.env.PORT || 3000;
 const userRoutes = require("./routes/userRoutes");
 const workspaceRoutes = require("./routes/workspaceRoutes");
 const analyticsRoutes = require("./routes/analyticsRoutes");
@@ -18,16 +16,19 @@ const chatRoutes = require("./routes/chatRoutes");
 const guestRoutes = require("./routes/guestRoutes"); // NEW: Guest routes
 
 // Debug: Check which routes are undefined
-console.log("🔍 Debug - Route Types:");
+console.log(" Debug - Route Types:");
 console.log("userRoutes:", typeof userRoutes);
 console.log("workspaceRoutes:", typeof workspaceRoutes);
 console.log("analyticsRoutes:", typeof analyticsRoutes);
 console.log("notificationRoutes:", typeof notificationRoutes);
 console.log("attendanceRoutes:", typeof attendanceRoutes);
 console.log("activeRoutes:", typeof activeRoutes);
-console.log("guestRoutes:", typeof guestRoutes); // NEW: Debug guest routes
+console.log("guestRoutes:", typeof guestRoutes); // Debug guest routes
+
+const PORT = process.env.PORT || 3000;
 
 const app = express();
+const server = http.createServer(app);
 
 // Create HTTP server FIRST
 const server = http.createServer(app);
@@ -62,7 +63,7 @@ app.use(express.urlencoded({ limit: "50mb", extended: true }));
 // Request logging middleware - Log ALL requests
 app.use((req, res, next) => {
   console.log(
-    `\n📥 [${new Date().toLocaleTimeString()}] ${req.method} ${req.path}`
+    `\n [${new Date().toLocaleTimeString()}] ${req.method} ${req.path}`
   );
   if (req.body && Object.keys(req.body).length > 0) {
     console.log("Body:", JSON.stringify(req.body, null, 2));
@@ -70,17 +71,15 @@ app.use((req, res, next) => {
   next();
 });
 
-// Health check route
-app.get("/health", (req, res) => {
-  res.json({ success: true, message: "Server is running" });
-});
+// all routes for users
+app.use(userRoutes);
 
 // ===== MONGODB ROUTES (Custom Backend) =====
 app.use("/api", attendanceRoutes);
 app.use("/api/notifications", notificationRoutes);
-app.use("/api/guest", guestRoutes); // NEW: Guest routes
+app.use("/api/guest", guestRoutes); // Guest routes
 
-// ===== OTHER CUSTOM ROUTES =====
+// OTHER ROUTES
 app.use(userRoutes);
 app.use("/dashboard", workspaceRoutes);
 app.use("/api", notificationRoutes);
@@ -92,7 +91,7 @@ app.use("/dashboard", taskRoutes);
 
 // 404 handler
 app.use((req, res) => {
-  console.log(`❌ 404 - Route not found: ${req.method} ${req.path}`);
+  console.log(` 404 - Route not found: ${req.method} ${req.path}`);
   res.status(404).json({
     success: false,
     message: `Route not found: ${req.method} ${req.path}`,
@@ -118,10 +117,10 @@ app.use(jsonRouter);
 
 // Start server with Socket.IO
 server.listen(PORT, () => {
-  console.log(`\n✅ Unified Server + Socket.IO running on port ${PORT}`);
-  console.log(`✅ MongoDB Backend: /api/attendance/*`);
-  console.log(`✅ Guest Mode API: /api/guest/*`); // NEW: Log guest routes
-  console.log(`✅ JSON Server: /users, /bookings, etc.`);
-  console.log(`✅ CORS enabled for http://localhost:5173`);
-  console.log(`✅ Check health: http://localhost:${PORT}/health\n`);
+  console.log(`\n Unified Server + Socket.IO running on port ${PORT}`);
+  console.log(` MongoDB Backend: /api/attendance/*`);
+  console.log(` Guest Mode API: /api/guest/*`); // NEW: Log guest routes
+  console.log(` JSON Server: /users, /bookings, etc.`);
+  console.log(` CORS enabled for http://localhost:5173`);
+  console.log(` Check health: http://localhost:${PORT}/health\n`);
 });

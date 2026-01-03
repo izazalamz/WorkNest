@@ -28,6 +28,24 @@ const workspaceSchema = new mongoose.Schema(
       enum: ["active", "maintenance", "inactive"],
       default: "active",
     },
+
+    //booking start date & time
+    startAt: {
+      type: Date,
+      default: null,
+    },
+
+    //booking end date & time
+    endAt: {
+      type: Date,
+      default: null,
+    },
+
+    //  Google Calendar event 
+    googleEventId: {
+      type: String,
+      default: null,
+    },
   },
   { timestamps: true }
 );
