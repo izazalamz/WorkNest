@@ -62,6 +62,25 @@ app.get("/health", (req, res) => {
   res.json({ success: true, message: "Server is running" });
 });
 
+// Connect to Database
+connectDB();
+  setInterval(expireBookings, 60 * 1000);
+
+app.get("/", (req, res) => {
+  res.send("WorkNest - Optimize Your Hybrid Workspace Effortlessly");
+});
+
+// all routes for users
+app.use(userRoutes);
+
+// all routes for wrokspace -
+app.use("/dashboard", workspaceRoutes); // api endpoint --> /dashboard/routes
+
+// all routes for analytics
+app.use("/dashboard", analyticsRoutes);
+// all routes for notifications
+app.use("/api/notifications", notificationRoutes);
+app.use("/api/bookings", bookingRoute);
 // These handle attendance with MongoDB
 app.use("/api", attendanceRoutes);
 app.use("/api/notifications", notificationRoutes);

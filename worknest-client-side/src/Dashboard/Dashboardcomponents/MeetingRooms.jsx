@@ -1,15 +1,17 @@
 import React, { useEffect, useState } from "react";
 import axios from "axios";
 
-/* 🔐 GOOGLE CONFIG (FROM .env) */
+/* 🔐 GOOGLE CONFIG */
 const CLIENT_ID = import.meta.env.VITE_GOOGLE_CLIENT_ID;
 const API_KEY = import.meta.env.VITE_GOOGLE_API_KEY;
 const SCOPES = "https://www.googleapis.com/auth/calendar.events";
 
 const MeetingRooms = () => {
-  const [meetingRooms, setMeetingRooms] = useState([]);
+  const [rooms, setRooms] = useState([]);
   const [loading, setLoading] = useState(true);
-  const [activeRoomId, setActiveRoomId] = useState(null);
+
+  const [detailsRoom, setDetailsRoom] = useState(null);
+  const [bookingRoom, setBookingRoom] = useState(null);
 
   const [bookingData, setBookingData] = useState({
     date: "",
@@ -51,19 +53,19 @@ const MeetingRooms = () => {
     initGapi();
   }, []);
 
-  /* ---------------- Fetch Meeting Rooms ---------------- */
+  /* ---------------- Fetch available rooms ---------------- */
   useEffect(() => {
-    const fetchMeetingRooms = async () => {
+    const fetchRooms = async () => {
       try {
         const res = await axios.get(
-          "http://localhost:3000/dashboard/workspace"
+          "http://localhost:3000/dashboard/workspaces"
         );
 
-        const rooms = (res.data.workspaces || []).filter(
-          (w) => w.type === "meeting-room"
+        const activeRooms = (res.data.workspaces || []).filter(
+          (w) => w.type === "meeting-room" && w.status === "active"
         );
 
-        setMeetingRooms(rooms);
+        setRooms(activeRooms);
       } catch (err) {
         console.error(err);
       } finally {
@@ -71,10 +73,13 @@ const MeetingRooms = () => {
       }
     };
 
-    fetchMeetingRooms();
+    fetchRooms();
   }, []);
 
   /* ---------------- Helpers ---------------- */
+  const handleChange = (e) =>
+    setBookingData({ ...bookingData, [e.target.name]: e.target.value });
+
   const convertTo24Hour = (time, period) => {
     let [hours, minutes] = time.split(":").map(Number);
     if (period === "PM" && hours !== 12) hours += 12;
@@ -82,21 +87,7 @@ const MeetingRooms = () => {
     return { hours, minutes };
   };
 
-  /* ---------------- Handlers ---------------- */
-  const handleBookClick = (roomId) => {
-    setActiveRoomId((prev) => (prev === roomId ? null : roomId));
-    setBookingData({
-      date: "",
-      startTime: "",
-      startPeriod: "AM",
-      endTime: "",
-      endPeriod: "AM",
-    });
-  };
-
-  const handleChange = (e) =>
-    setBookingData({ ...bookingData, [e.target.name]: e.target.value });
-
+  /* ---------------- Booking ---------------- */
   const handleSubmit = async (e, room) => {
     e.preventDefault();
 
@@ -109,48 +100,66 @@ const MeetingRooms = () => {
       client_id: CLIENT_ID,
       scope: SCOPES,
       callback: async (tokenResponse) => {
-        window.gapi.client.setToken(tokenResponse);
+        try {
+          window.gapi.client.setToken(tokenResponse);
 
-        const startConv = convertTo24Hour(
-          bookingData.startTime,
-          bookingData.startPeriod
-        );
-        const endConv = convertTo24Hour(
-          bookingData.endTime,
-          bookingData.endPeriod
-        );
+          // Convert time to 24h
+          const startConv = convertTo24Hour(
+            bookingData.startTime,
+            bookingData.startPeriod
+          );
+          const endConv = convertTo24Hour(
+            bookingData.endTime,
+            bookingData.endPeriod
+          );
 
-        const start = new Date(bookingData.date);
-        start.setHours(startConv.hours, startConv.minutes);
+          const start = new Date(bookingData.date);
+          start.setHours(startConv.hours, startConv.minutes, 0, 0);
 
-        const end = new Date(bookingData.date);
-        end.setHours(endConv.hours, endConv.minutes);
+          const end = new Date(bookingData.date);
+          end.setHours(endConv.hours, endConv.minutes, 0, 0);
 
-        const event = {
-          summary: `Meeting Room Booking - ${room.name}`,
-          description: `
-Building: ${room.location?.building}
-Floor: ${room.location?.floor}
-Zone: ${room.location?.zone}
-Capacity: ${room.capacity}
-          `,
-          start: {
-            dateTime: start.toISOString(),
-            timeZone: Intl.DateTimeFormat().resolvedOptions().timeZone,
-          },
-          end: {
-            dateTime: end.toISOString(),
-            timeZone: Intl.DateTimeFormat().resolvedOptions().timeZone,
-          },
-        };
+          const now = new Date();
+          if (start < now) {
+            alert("❌ You can only book for the present or future time.");
+            return;
+          }
 
-        await window.gapi.client.calendar.events.insert({
-          calendarId: "primary",
-          resource: event,
-        });
+          // ---------- Google Calendar Event ----------
+          const event = {
+            summary: `Meeting Room Booking - ${room.name}`,
+            start: {
+              dateTime: start.toISOString(),
+              timeZone: Intl.DateTimeFormat().resolvedOptions().timeZone,
+            },
+            end: {
+              dateTime: end.toISOString(),
+              timeZone: Intl.DateTimeFormat().resolvedOptions().timeZone,
+            },
+          };
 
-        alert("✅ Meeting room booked & added to Google Calendar");
-        setActiveRoomId(null);
+          const insertRes = await window.gapi.client.calendar.events.insert({
+            calendarId: "primary",
+            resource: event,
+          });
+
+          // ---------- POST booking to backend ----------
+          await axios.post("http://localhost:3000/api/bookings", {
+            workspaceId: room._id,
+            startAt: start.toISOString(),
+            endAt: end.toISOString(),
+            googleEventId: insertRes.result.id,
+          });
+
+          // ---------- Update frontend ----------
+          setRooms((prev) => prev.filter((r) => r._id !== room._id));
+          setBookingRoom(null);
+
+          alert("✅ Meeting room booked successfully");
+        } catch (err) {
+          console.error(err);
+          alert("❌ Booking failed");
+        }
       },
     });
 
@@ -164,126 +173,135 @@ Capacity: ${room.capacity}
   return (
     <div className="mx-auto max-w-7xl px-6 py-10">
       <div className="text-center mb-10">
-        <h1 className="text-4xl font-bold mb-4">Meeting Rooms</h1>
+        <h1 className="text-4xl font-bold mb-4">Available Meeting Rooms</h1>
         <h2 className="text-lg text-gray-600">
-          View availability & book instantly
+          View details & book instantly
         </h2>
       </div>
 
       <div className="grid gap-6 sm:grid-cols-2 md:grid-cols-3">
-        {meetingRooms.map((room) => (
+        {rooms.map((room) => (
           <div key={room._id} className="border rounded-xl p-4 shadow-sm">
             <h3 className="font-semibold text-lg">{room.name}</h3>
+            <p className="text-xs mt-1 text-green-600">Status: {room.status}</p>
 
-            <p className="text-sm text-gray-500 mt-1">
-              {room.location?.building}, Floor {room.location?.floor}, Zone{" "}
-              {room.location?.zone}
-            </p>
+            <div className="mt-4 flex gap-2">
+              <button
+                onClick={() => setDetailsRoom(room)}
+                className="flex-1 rounded bg-indigo-600 py-2 text-white text-sm"
+              >
+                View Details
+              </button>
+              <button
+                onClick={() => setBookingRoom(room)}
+                className="flex-1 rounded bg-slate-900 py-2 text-white text-sm"
+              >
+                Book Room
+              </button>
+            </div>
+          </div>
+        ))}
+      </div>
 
-            {room.location?.description && (
-              <p className="text-xs text-gray-500 mt-1">
-                {room.location.description}
-              </p>
-            )}
+      {/* ---------------- DETAILS MODAL ---------------- */}
+      {detailsRoom && (
+        <div className="fixed inset-0 bg-black/40 flex items-center justify-center z-50">
+          <div className="bg-white rounded-xl p-6 w-full max-w-md">
+            <h2 className="text-xl font-bold mb-4">{detailsRoom.name}</h2>
+            <p><strong>Building:</strong> {detailsRoom.location?.building}</p>
+            <p><strong>Floor:</strong> {detailsRoom.location?.floor}</p>
+            <p><strong>Zone:</strong> {detailsRoom.location?.zone}</p>
+            <p><strong>Description:</strong> {detailsRoom.location?.description}</p>
+            <p><strong>Capacity:</strong> {detailsRoom.capacity}</p>
 
-            <p className="mt-1 text-sm">
-              <span className="font-medium">Capacity:</span>{" "}
-              {room.capacity || "N/A"}
-            </p>
-
-            <p
-              className={`mt-2 text-xs font-medium ${
-                room.status === "active" ? "text-green-600" : "text-red-600"
-              }`}
-            >
-              {room.status}
-            </p>
-
-            {room.amenities?.length > 0 && (
-              <div className="mt-2 flex flex-wrap gap-2">
-                {room.amenities.map((a) => (
-                  <span
-                    key={a}
-                    className="rounded-full bg-indigo-50 px-2 py-1 text-xs text-indigo-600"
-                  >
-                    {a.replace("_", " ")}
-                  </span>
-                ))}
+            {detailsRoom.amenities?.length > 0 && detailsRoom.amenities[0] !== "" && (
+              <div className="mt-3">
+                <strong>Amenities:</strong>
+                <ul className="list-disc ml-5 mt-1">
+                  {detailsRoom.amenities.map((a, i) => (
+                    <li key={i}>{a}</li>
+                  ))}
+                </ul>
               </div>
             )}
 
             <button
-              disabled={room.status !== "active"}
-              onClick={() => handleBookClick(room._id)}
-              className={`mt-4 w-full rounded-lg py-2 text-sm font-semibold ${
-                room.status === "active"
-                  ? "bg-slate-900 text-white"
-                  : "bg-gray-300 text-gray-500 cursor-not-allowed"
-              }`}
+              onClick={() => setDetailsRoom(null)}
+              className="mt-5 w-full rounded bg-gray-800 py-2 text-white"
             >
-              {activeRoomId === room._id ? "Cancel" : "Book Room"}
+              Close
             </button>
+          </div>
+        </div>
+      )}
 
-            {activeRoomId === room._id && (
-              <form
-                onSubmit={(e) => handleSubmit(e, room)}
-                className="mt-4 space-y-2 border-t pt-3"
-              >
+      {/* ---------------- BOOKING MODAL ---------------- */}
+      {bookingRoom && (
+        <div className="fixed inset-0 bg-black/40 flex items-center justify-center z-50">
+          <div className="bg-white rounded-xl p-6 w-full max-w-md">
+            <h2 className="text-xl font-bold mb-4">Book {bookingRoom.name}</h2>
+
+            <form
+              onSubmit={(e) => handleSubmit(e, bookingRoom)}
+              className="space-y-3"
+            >
+              <input
+                type="date"
+                name="date"
+                min={new Date().toISOString().split("T")[0]}
+                required
+                onChange={handleChange}
+                className="w-full border px-3 py-2 rounded"
+              />
+
+              <div className="flex gap-2">
                 <input
-                  type="date"
-                  name="date"
+                  type="time"
+                  name="startTime"
+                  min={
+                    bookingData.date === new Date().toISOString().split("T")[0]
+                      ? new Date().toTimeString().slice(0, 5)
+                      : undefined
+                  }
                   required
                   onChange={handleChange}
-                  className="w-full border px-3 py-2 rounded"
+                  className="flex-1 border px-3 py-2 rounded"
                 />
+                <select name="startPeriod" onChange={handleChange} className="border px-2 rounded">
+                  <option>AM</option>
+                  <option>PM</option>
+                </select>
+              </div>
 
-                <div className="flex gap-2">
-                  <input
-                    type="time"
-                    name="startTime"
-                    required
-                    onChange={handleChange}
-                    className="flex-1 border px-3 py-2 rounded"
-                  />
-                  <select
-                    name="startPeriod"
-                    onChange={handleChange}
-                    className="border px-2 rounded"
-                  >
-                    <option>AM</option>
-                    <option>PM</option>
-                  </select>
-                </div>
+              <div className="flex gap-2">
+                <input
+                  type="time"
+                  name="endTime"
+                  required
+                  onChange={handleChange}
+                  className="flex-1 border px-3 py-2 rounded"
+                />
+                <select name="endPeriod" onChange={handleChange} className="border px-2 rounded">
+                  <option>AM</option>
+                  <option>PM</option>
+                </select>
+              </div>
 
-                <div className="flex gap-2">
-                  <input
-                    type="time"
-                    name="endTime"
-                    required
-                    onChange={handleChange}
-                    className="flex-1 border px-3 py-2 rounded"
-                  />
-                  <select
-                    name="endPeriod"
-                    onChange={handleChange}
-                    className="border px-2 rounded"
-                  >
-                    <option>AM</option>
-                    <option>PM</option>
-                  </select>
-                </div>
+              <button type="submit" className="w-full rounded bg-green-600 py-2 text-white">
+                Confirm Booking
+              </button>
 
-                <button
-                  type="submit"
-                  className="w-full rounded bg-green-600 py-2 text-white"
-                >
-                  Confirm Booking
-                </button>
-              </form>
-            )}
+              <button
+                type="button"
+                onClick={() => setBookingRoom(null)}
+                className="w-full rounded bg-gray-800 py-2 text-white"
+              >
+                Cancel
+              </button>
+            </form>
           </div>
-        ))}
-      </div>
+        </div>
+      )}
     </div>
   );
 };
