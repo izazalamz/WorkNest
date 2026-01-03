@@ -121,6 +121,20 @@ const deleteWorkspace = async (req, res) => {
   try {
     const { id } = req.params;
 
+    // Check if workspace has active bookings
+    const Booking = require("../models/bookingModel");
+    const activeBookings = await Booking.countDocuments({
+      workspaceId: id,
+      status: { $in: ["confirmed", "checked_in"] },
+    });
+
+    if (activeBookings > 0) {
+      return res.status(400).json({
+        success: false,
+        message: `Cannot delete workspace. It has ${activeBookings} active booking(s). Please cancel or complete all bookings first.`,
+      });
+    }
+
     const deletedWorkspace = await Workspace.findByIdAndDelete(id);
 
     if (!deletedWorkspace) {

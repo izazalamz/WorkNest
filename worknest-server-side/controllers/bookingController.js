@@ -32,6 +32,24 @@ const createBooking = async (req, res) => {
       return res.status(400).json({ message: "Workspace is not available" });
     }
 
+    // 2.5️⃣ Check for overlapping bookings (prevent double booking)
+    const overlappingBooking = await Booking.findOne({
+      workspaceId,
+      status: { $in: ["confirmed", "checked_in"] },
+      $or: [
+        {
+          startAt: { $lt: new Date(endAt) },
+          endAt: { $gt: new Date(startAt) },
+        },
+      ],
+    });
+
+    if (overlappingBooking) {
+      return res.status(400).json({
+        message: "Workspace is already booked for this time period",
+      });
+    }
+
     // 3️⃣ Create booking (with optional Google Calendar integration)
     const bookingData = {
       userId: user._id,
@@ -195,12 +213,29 @@ const cancelBooking = async (req, res) => {
     booking.status = "cancelled";
     await booking.save();
 
-    // Reactivate workspace
-    await Workspace.findByIdAndUpdate(booking.workspaceId, {
-      status: "active",
-      startAt: null,
-      endAt: null,
-    });
+    // Reactivate workspace (only if it still exists)
+    const workspace = await Workspace.findById(booking.workspaceId);
+    if (workspace) {
+      // Check if there are other active bookings for this workspace
+      const otherActiveBookings = await Booking.countDocuments({
+        workspaceId: booking.workspaceId,
+        status: { $in: ["confirmed", "checked_in"] },
+        _id: { $ne: booking._id },
+      });
+
+      // Only reactivate if no other active bookings exist
+      if (otherActiveBookings === 0) {
+        await Workspace.findByIdAndUpdate(booking.workspaceId, {
+          status: "active",
+          startAt: null,
+          endAt: null,
+        });
+      }
+    } else {
+      console.warn(
+        `Workspace ${booking.workspaceId} not found when canceling booking ${booking._id}`
+      );
+    }
 
     res.status(200).json({ success: true });
   } catch (err) {
@@ -223,18 +258,32 @@ const expireBookings = async () => {
     });
 
     for (const booking of expiredBookings) {
-      // Free workspace
-      await Workspace.findByIdAndUpdate(booking.workspaceId, {
-        status: "active",
-        startAt: null,
-        endAt: null,
-      });
-
       // Mark booking as expired
       booking.status = "expired";
       await booking.save();
 
-      console.log(`Booking ${booking._id} expired and workspace released`);
+      // Free workspace (only if it still exists and no other active bookings)
+      const workspace = await Workspace.findById(booking.workspaceId);
+      if (workspace) {
+        const otherActiveBookings = await Booking.countDocuments({
+          workspaceId: booking.workspaceId,
+          status: { $in: ["confirmed", "checked_in"] },
+          _id: { $ne: booking._id },
+        });
+
+        if (otherActiveBookings === 0) {
+          await Workspace.findByIdAndUpdate(booking.workspaceId, {
+            status: "active",
+            startAt: null,
+            endAt: null,
+          });
+          console.log(`Booking ${booking._id} expired and workspace released`);
+        }
+      } else {
+        console.warn(
+          `Workspace ${booking.workspaceId} not found when expiring booking ${booking._id}`
+        );
+      }
     }
   } catch (err) {
     console.error("Error expiring bookings:", err);
@@ -264,18 +313,32 @@ const timeoutBookings = async () => {
     });
 
     for (const booking of timedOutBookings) {
-      // Free workspace
-      await Workspace.findByIdAndUpdate(booking.workspaceId, {
-        status: "active",
-        startAt: null,
-        endAt: null,
-      });
-
       // Mark booking as no_show
       booking.status = "no_show";
       await booking.save();
 
-      console.log(`Booking ${booking._id} timed out (no check-in) and workspace released`);
+      // Free workspace (only if it still exists and no other active bookings)
+      const workspace = await Workspace.findById(booking.workspaceId);
+      if (workspace) {
+        const otherActiveBookings = await Booking.countDocuments({
+          workspaceId: booking.workspaceId,
+          status: { $in: ["confirmed", "checked_in"] },
+          _id: { $ne: booking._id },
+        });
+
+        if (otherActiveBookings === 0) {
+          await Workspace.findByIdAndUpdate(booking.workspaceId, {
+            status: "active",
+            startAt: null,
+            endAt: null,
+          });
+          console.log(`Booking ${booking._id} timed out (no check-in) and workspace released`);
+        }
+      } else {
+        console.warn(
+          `Workspace ${booking.workspaceId} not found when timing out booking ${booking._id}`
+        );
+      }
     }
   } catch (err) {
     console.error("Error timing out bookings:", err);
