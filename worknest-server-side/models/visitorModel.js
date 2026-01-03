@@ -52,6 +52,25 @@ const visitorSchema = new mongoose.Schema(
       },
       lastError: { type: String },
     },
+
+    // ===== NEW FIELDS FOR GUEST MODE =====
+    // Guest mode flag
+    isGuestMode: {
+      type: Boolean,
+      default: false,
+    },
+
+    // Access token for demo dashboard
+    accessToken: {
+      type: String,
+      unique: true,
+      sparse: true, // Allows null values for non-guest visitors
+    },
+
+    // Token expiry date/time
+    tokenExpiry: {
+      type: Date,
+    },
   },
   { timestamps: true }
 );
@@ -59,5 +78,8 @@ const visitorSchema = new mongoose.Schema(
 // Common query patterns
 visitorSchema.index({ hostUserId: 1, visitStartAt: -1 });
 visitorSchema.index({ status: 1, visitStartAt: -1 });
+visitorSchema.index({ accessToken: 1 }); // Index for token lookup
+visitorSchema.index({ email: 1, isGuestMode: 1 }); // Index for guest lookup
+visitorSchema.index({ isGuestMode: 1, accessToken: 1 }); // Compound index for faster queries
 
 module.exports = mongoose.model("Visitor", visitorSchema);

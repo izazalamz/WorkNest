@@ -20,7 +20,7 @@ import {
   HelpCircle,
   PlusSquare,
   ChartBar,
-  UserCheck,
+  UserCheck, // NEW: Icon for Guest Management
 } from "lucide-react";
 import { AuthContext } from "../contexts/AuthContext";
 import useUserRole from "../hooks/useUserRole";
@@ -72,7 +72,6 @@ const DashboardLayout = () => {
         const u = res.data.user;
         setUserData({
           name: u.name || "",
-          email: u.email || "",
           companyName: u.companyName || "",
           department: u.department || "",
           role: u.role || "employee",
@@ -153,7 +152,7 @@ const DashboardLayout = () => {
                     {userData.name}
                   </p>
                   <p className="text-xs text-muted-foreground">
-                    {role === "admin" ? "Administrator" : "Employee"}
+                    {userData.role === "admin" ? "Administrator" : "Employee"}
                   </p>
                 </div>
                 <ChevronDown
@@ -180,7 +179,7 @@ const DashboardLayout = () => {
                       </p>
                       <div className="mt-2">
                         <span className="inline-block px-2 py-1 text-xs font-medium bg-primary/10 text-primary rounded">
-                          {role}
+                          {userData.role}
                         </span>
                       </div>
                     </div>
@@ -244,7 +243,7 @@ const DashboardLayout = () => {
 
           {/* Navigation */}
           <nav className="space-y-2 flex-1">
-            {/* Common Links - Show to Everyone */}
+            {/* Common Links for All Users */}
             <NavLink to="/dashboard" className={linkClasses} end>
               <LayoutDashboard size={20} />
               <span className="font-medium">Dashboard</span>
@@ -255,18 +254,7 @@ const DashboardLayout = () => {
               <span className="font-medium">NestBoard</span>
             </NavLink>
 
-            <NavLink to="/dashboard/desk-booking" className={linkClasses}>
-              <MapPin size={20} />
-              <span className="font-medium">Desk Booking</span>
-            </NavLink>
-            <NavLink to="/dashboard/meeting-rooms" className={linkClasses}>
-              <Calendar size={20} />
-              <span className="font-medium">Meeting Rooms</span>
-            </NavLink>
-            <NavLink to="/dashboard/my-bookings" className={linkClasses}>
-              <Users size={20} />
-              <span className="font-medium">My Bookings</span>
-            </NavLink>
+            {/* Employee-Only Links */}
             {role === "employee" && (
               <>
                 <NavLink to="/dashboard/desk-booking" className={linkClasses}>
@@ -314,7 +302,7 @@ const DashboardLayout = () => {
               </>
             )}
 
-            {/* Common Links - Show to Everyone */}
+            {/* Common Links for All Users */}
             <NavLink to="/dashboard/profile" className={linkClasses}>
               <User size={20} />
               <span className="font-medium">My Profile</span>
@@ -351,7 +339,6 @@ const DashboardLayout = () => {
               </NavLink>
             </div>
           )}
-
           {/* Logout Button */}
           <div className="mt-8 pt-6 border-t border-border">
             <button
@@ -367,7 +354,7 @@ const DashboardLayout = () => {
         {/* Backdrop (Mobile) */}
         {sidebarOpen && (
           <div
-            className="fixed inset-0 bg-black/40 z-20 md:hidden"
+            className="fixed inset-0 bg-black/40 z-30 md:hidden"
             onClick={toggleSidebar}
           />
         )}

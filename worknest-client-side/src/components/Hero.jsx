@@ -1,8 +1,11 @@
 import React from "react";
 import heroImage from "../assets/heroImage.png";
-import { Link } from "react-router";
+import { Link, useNavigate } from "react-router";
+import { Eye } from "lucide-react";
 
 const Hero = () => {
+  const navigate = useNavigate();
+
   return (
     <section className="py-20 bg-background">
       <div className="fix-alignment">
@@ -20,7 +23,16 @@ const Hero = () => {
                 <Link to={"/signup"}>
                   <button className="btn-primary">Get Started Free</button>
                 </Link>
-                <button className=" cursor-pointer  overflow-hidden rounded-lg h-10 px-5 bg-gray-200 dark:bg-gray-700 text-foreground dark:text-white text-base font-semibold  hover:bg-gray-300 dark:hover:bg-gray-600 transition-colors">
+                
+                <button 
+                  onClick={() => navigate("/guest-request")}
+                  className="flex items-center gap-2 cursor-pointer overflow-hidden rounded-lg h-10 px-5 bg-gray-200 dark:bg-gray-700 text-foreground dark:text-white text-base font-semibold hover:bg-gray-300 dark:hover:bg-gray-600 transition-colors"
+                >
+                  <Eye className="w-4 h-4" />
+                  Visit as Guest
+                </button>
+                
+                <button className="cursor-pointer overflow-hidden rounded-lg h-10 px-5 bg-gray-200 dark:bg-gray-700 text-foreground dark:text-white text-base font-semibold hover:bg-gray-300 dark:hover:bg-gray-600 transition-colors">
                   Watch Demo
                 </button>
               </div>

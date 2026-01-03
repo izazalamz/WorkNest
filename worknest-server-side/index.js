@@ -13,13 +13,27 @@ const attendanceRoutes = require("./routes/attendanceRoutes");
 const activeRoutes = require("./routes/activeRoutes");
 const taskRoutes = require("./routes/taskRoutes");
 const chatRoutes = require("./routes/chatRoutes");
+const guestRoutes = require("./routes/guestRoutes"); // NEW: Guest routes
+
+// Debug: Check which routes are undefined
+console.log(" Debug - Route Types:");
+console.log("userRoutes:", typeof userRoutes);
+console.log("workspaceRoutes:", typeof workspaceRoutes);
+console.log("analyticsRoutes:", typeof analyticsRoutes);
+console.log("notificationRoutes:", typeof notificationRoutes);
+console.log("attendanceRoutes:", typeof attendanceRoutes);
+console.log("activeRoutes:", typeof activeRoutes);
+console.log("guestRoutes:", typeof guestRoutes); // Debug guest routes
 
 const PORT = process.env.PORT || 3000;
 
 const app = express();
 const server = http.createServer(app);
 
-// Socket.IO
+// Create HTTP server FIRST
+const server = http.createServer(app);
+
+// NOW create Socket.IO with the server
 const io = new Server(server, {
   cors: {
     origin: "http://localhost:5173", // frontend URL
@@ -57,40 +71,19 @@ app.use((req, res, next) => {
   next();
 });
 
-// Health check route
-app.get("/health", (req, res) => {
-  res.json({ success: true, message: "Server is running" });
-});
-
-// Connect to Database
-connectDB();
-  setInterval(expireBookings, 60 * 1000);
-
-app.get("/", (req, res) => {
-  res.send("WorkNest - Optimize Your Hybrid Workspace Effortlessly");
-});
-
 // all routes for users
 app.use(userRoutes);
 
-// all routes for wrokspace -
-app.use("/dashboard", workspaceRoutes); // api endpoint --> /dashboard/routes
-
-// all routes for analytics
-app.use("/dashboard", analyticsRoutes);
-// all routes for notifications
-app.use("/api/notifications", notificationRoutes);
-app.use("/api/bookings", bookingRoute);
-// These handle attendance with MongoDB
+// ===== MONGODB ROUTES (Custom Backend) =====
 app.use("/api", attendanceRoutes);
 app.use("/api/notifications", notificationRoutes);
+app.use("/api/guest", guestRoutes); // Guest routes
 
 // OTHER ROUTES
 app.use(userRoutes);
 app.use("/dashboard", workspaceRoutes);
 app.use("/api", notificationRoutes);
 app.use("/api", attendanceRoutes);
-app.use("/dashboard", workspaceRoutes);
 app.use("/dashboard", activeRoutes);
 app.use("/api/dashboard", analyticsRoutes);
 app.use(chatRoutes);
@@ -116,15 +109,18 @@ app.use((err, req, res, next) => {
 });
 
 // JSON SERVER ROUTES (For Users Data)
-// This serves your db.json file for user management
 const jsonRouter = jsonServer.router("db.json");
 const jsonMiddlewares = jsonServer.defaults();
 
-// Use JSON Server for remaining routes (like /users)
 app.use(jsonMiddlewares);
 app.use(jsonRouter);
 
-// server run
+// Start server with Socket.IO
 server.listen(PORT, () => {
-  console.log(`Server + Socket.IO running on port ${PORT}`);
+  console.log(`\n Unified Server + Socket.IO running on port ${PORT}`);
+  console.log(` MongoDB Backend: /api/attendance/*`);
+  console.log(` Guest Mode API: /api/guest/*`); // NEW: Log guest routes
+  console.log(` JSON Server: /users, /bookings, etc.`);
+  console.log(` CORS enabled for http://localhost:5173`);
+  console.log(` Check health: http://localhost:${PORT}/health\n`);
 });
