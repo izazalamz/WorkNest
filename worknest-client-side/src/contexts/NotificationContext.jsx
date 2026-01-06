@@ -9,7 +9,9 @@ const NotificationContext = createContext();
 export const useNotification = () => {
   const context = useContext(NotificationContext);
   if (!context) {
-    throw new Error("useNotification must be used within a NotificationProvider");
+    throw new Error(
+      "useNotification must be used within a NotificationProvider"
+    );
   }
   return context;
 };
@@ -21,7 +23,7 @@ export const NotificationProvider = ({ children }) => {
   const fetchNotifications = async () => {
     try {
       const response = await axios.get(
-        "http://localhost:3000/api/notifications"
+        "https://worknest-u174.onrender.com/api/notifications"
       );
       setNotifications(response.data);
     } catch (error) {
@@ -38,7 +40,7 @@ export const NotificationProvider = ({ children }) => {
   const createNotification = async (notificationData) => {
     try {
       const response = await axios.post(
-        "http://localhost:3000/api/notifications",
+        "https://worknest-u174.onrender.com/api/notifications",
         notificationData
       );
       setNotifications((prev) => [...prev, response.data]);
@@ -51,7 +53,9 @@ export const NotificationProvider = ({ children }) => {
 
   const markAsRead = async (id) => {
     try {
-      await axios.patch(`http://localhost:3000/api/notifications/${id}/read`);
+      await axios.patch(
+        `https://worknest-u174.onrender.com/api/notifications/${id}/read`
+      );
       setNotifications((prev) =>
         prev.map((n) => (n._id === id ? { ...n, isRead: true } : n))
       );
@@ -62,7 +66,9 @@ export const NotificationProvider = ({ children }) => {
 
   const deleteNotification = async (id) => {
     try {
-      await axios.delete(`http://localhost:3000/api/notifications/${id}`);
+      await axios.delete(
+        `https://worknest-u174.onrender.com/api/notifications/${id}`
+      );
       setNotifications((prev) => prev.filter((n) => n._id !== id));
     } catch (error) {
       console.error("Error deleting notification:", error);

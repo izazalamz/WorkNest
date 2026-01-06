@@ -1,4 +1,5 @@
 import React, { useContext, useEffect, useMemo, useState } from "react";
+import axios from "axios";
 import TaskModal from "./TaskModal";
 import { AuthContext } from "../../contexts/AuthContext";
 import Loading from "../../components/Loading";
@@ -29,25 +30,26 @@ const NestBoard = () => {
   const { user } = useContext(AuthContext);
   const uid = user?.uid;
 
+  // FETCH TASKS
   useEffect(() => {
+    if (!uid) return;
+
     const fetchTasks = async () => {
       try {
         setLoading(true);
 
-        const res = await fetch(
-          "http://localhost:3000/dashboard/nestboard/tasks",
+        const res = await axios.get(
+          "https://worknest-u174.onrender.com/dashboard/nestboard/tasks",
           {
             headers: { "x-user-uid": uid },
           }
         );
 
-        const data = await res.json();
-
-        if (!res.ok || !data.success) {
-          throw new Error(data.message || "Failed to load tasks.");
+        if (!res.data?.success) {
+          throw new Error(res.data?.message || "Failed to load tasks.");
         }
 
-        setTasks(data.tasks || []);
+        setTasks(res.data.tasks || []);
       } catch (err) {
         console.error("NestBoard fetch error:", err);
       } finally {
@@ -55,7 +57,7 @@ const NestBoard = () => {
       }
     };
 
-    if (uid) fetchTasks();
+    fetchTasks();
   }, [uid]);
 
   const filteredTasks = useMemo(() => {
@@ -76,73 +78,69 @@ const NestBoard = () => {
     return grouped;
   }, [filteredTasks]);
 
+  // ADD TASK
   const addTask = async (payload) => {
     try {
-      const res = await fetch(
-        "http://localhost:3000/dashboard/nestboard/tasks",
+      const res = await axios.post(
+        "https://worknest-u174.onrender.com/dashboard/nestboard/tasks",
+        payload,
         {
-          method: "POST",
           headers: {
             "Content-Type": "application/json",
             "x-user-uid": uid,
           },
-          body: JSON.stringify(payload),
         }
       );
 
-      const data = await res.json();
-
-      if (!res.ok || !data.success) {
-        throw new Error(data.message || "Failed to create task.");
+      if (!res.data?.success) {
+        throw new Error(res.data?.message || "Failed to create task.");
       }
 
-      setTasks((prev) => [data.task, ...prev]);
+      setTasks((prev) => [res.data.task, ...prev]);
       setModalOpen(false);
     } catch (err) {
       console.error("Create task error:", err);
     }
   };
 
+  // MOVE TASK
   const moveTask = async (taskId, nextStatus) => {
     try {
-      const res = await fetch(
-        `http://localhost:3000/dashboard/nestboard/tasks/${taskId}`,
+      const res = await axios.patch(
+        `https://worknest-u174.onrender.com/dashboard/nestboard/tasks/${taskId}`,
+        { status: nextStatus },
         {
-          method: "PATCH",
           headers: {
             "Content-Type": "application/json",
             "x-user-uid": uid,
           },
-          body: JSON.stringify({ status: nextStatus }),
         }
       );
 
-      const data = await res.json();
-
-      if (!res.ok || !data.success) {
-        throw new Error(data.message || "Failed to move task.");
+      if (!res.data?.success) {
+        throw new Error(res.data?.message || "Failed to move task.");
       }
 
-      setTasks((prev) => prev.map((t) => (t._id === taskId ? data.task : t)));
+      setTasks((prev) =>
+        prev.map((t) => (t._id === taskId ? res.data.task : t))
+      );
     } catch (err) {
       console.error("Move task error:", err);
     }
   };
 
+  // DELETE TASK
   const deleteTask = async (taskId) => {
     try {
-      const res = await fetch(
-        `http://localhost:3000/dashboard/nestboard/tasks/${taskId}`,
+      const res = await axios.delete(
+        `https://worknest-u174.onrender.com/dashboard/nestboard/tasks/${taskId}`,
         {
-          method: "DELETE",
           headers: { "x-user-uid": uid },
         }
       );
 
-      const data = await res.json();
-
-      if (!res.ok || !data.success) {
-        throw new Error(data.message || "Failed to delete task.");
+      if (!res.data?.success) {
+        throw new Error(res.data?.message || "Failed to delete task.");
       }
 
       setTasks((prev) => prev.filter((t) => t._id !== taskId));
@@ -215,11 +213,11 @@ const NestBoard = () => {
                   </span>
                 </div>
 
-                <div className="space-y-4  rounded-lg  flex-1 overflow-y-auto ">
+                <div className="space-y-4 rounded-lg flex-1 overflow-y-auto">
                   {colTasks.map((task) => (
                     <div
                       key={task._id}
-                      className="bg-white   rounded-lg border border-primary/40 p-4"
+                      className="bg-white rounded-lg border border-primary/40 p-4"
                     >
                       <div className="flex items-start justify-between gap-3">
                         <div className="min-w-0">
@@ -233,7 +231,6 @@ const NestBoard = () => {
                             </p>
                           )}
 
-                          {/* TAG + DATE */}
                           {task.tag || task.dueDate ? (
                             <div className="mt-3 flex flex-wrap gap-4">
                               {task.tag && (
@@ -244,19 +241,6 @@ const NestBoard = () => {
 
                               {task.dueDate && (
                                 <span className="inline-flex items-center gap-1 px-2.5 py-1 bg-gray-100 text-gray-700 text-xs font-medium rounded">
-                                  <svg
-                                    className="w-4 h-4"
-                                    fill="none"
-                                    stroke="currentColor"
-                                    viewBox="0 0 24 24"
-                                  >
-                                    <path
-                                      strokeLinecap="round"
-                                      strokeLinejoin="round"
-                                      strokeWidth="2"
-                                      d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z"
-                                    />
-                                  </svg>
                                   {formatShortDate(task.dueDate)}
                                 </span>
                               )}

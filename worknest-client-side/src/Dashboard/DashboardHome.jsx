@@ -69,7 +69,9 @@ const DashboardHome = () => {
 
     const fetchUser = async () => {
       try {
-        const res = await axios.get(`http://localhost:3000/users/${uid}`);
+        const res = await axios.get(
+          `https://worknest-u174.onrender.com/users/${uid}`
+        );
         setUserData(res.data.user);
       } catch (err) {
         console.error("User fetch error:", err);
@@ -89,7 +91,7 @@ const DashboardHome = () => {
 
       try {
         const res = await axios.get(
-          `http://localhost:3000/api/bookings/my?uid=${user.uid}`
+          `https://worknest-u174.onrender.com/api/bookings/my?uid=${user.uid}`
         );
 
         setUpcomingBookings(res.data.upcomingBookings || []);

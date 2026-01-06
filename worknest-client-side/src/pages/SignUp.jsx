@@ -66,7 +66,9 @@ const SignUp = () => {
       // Check if user exists in MongoDB (404 is expected for new users)
       let userExists = false;
       try {
-        const res = await axios.get(`http://localhost:3000/users/${user.uid}`);
+        const res = await axios.get(
+          `https://worknest-u174.onrender.com/users/${user.uid}`
+        );
         if (res.data.user) {
           userExists = true;
         }
@@ -83,12 +85,15 @@ const SignUp = () => {
 
       if (!userExists) {
         // First time signup - create user in MongoDB
-        const createResponse = await axios.post("http://localhost:3000/users", {
-          uid: user.uid,
-          email: user.email,
-          name: "",
-          profileCompleted: false,
-        });
+        const createResponse = await axios.post(
+          "https://worknest-u174.onrender.com/users",
+          {
+            uid: user.uid,
+            email: user.email,
+            name: "",
+            profileCompleted: false,
+          }
+        );
 
         // Check if user was created successfully
         if (createResponse.data.success) {
@@ -146,7 +151,9 @@ const SignUp = () => {
       let userExists = false;
       let userData = null;
       try {
-        const res = await axios.get(`http://localhost:3000/users/${user.uid}`);
+        const res = await axios.get(
+          `https://worknest-u174.onrender.com/users/${user.uid}`
+        );
         if (res.data.user) {
           userExists = true;
           userData = res.data.user;
@@ -163,13 +170,16 @@ const SignUp = () => {
 
       if (!userExists) {
         // Create new user
-        const createResponse = await axios.post("http://localhost:3000/users", {
-          uid: user.uid,
-          email: user.email,
-          name: user.displayName || "",
-          photoURL: user.photoURL,
-          profileCompleted: false,
-        });
+        const createResponse = await axios.post(
+          "https://worknest-u174.onrender.com/users",
+          {
+            uid: user.uid,
+            email: user.email,
+            name: user.displayName || "",
+            photoURL: user.photoURL,
+            profileCompleted: false,
+          }
+        );
 
         if (createResponse.data.success) {
           showNotification(
@@ -247,7 +257,8 @@ const SignUp = () => {
                     Create Your Account
                   </h1>
                   <p className="text-muted-foreground text-base font-normal pb-8">
-                    Join WorkNest and transform your hybrid workspace management.
+                    Join WorkNest and transform your hybrid workspace
+                    management.
                   </p>
 
                   <form onSubmit={handleSubmit}>

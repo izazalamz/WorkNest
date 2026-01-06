@@ -17,7 +17,9 @@ const EmployeeSupportChat = () => {
   useEffect(() => {
     const fetchAdmin = async () => {
       try {
-        const res = await axios.get("http://localhost:3000/users/admin");
+        const res = await axios.get(
+          "https://worknest-u174.onrender.com/users/admin"
+        );
         setAdminUid(res.data.uid);
       } catch (error) {
         console.error("Failed to fetch admin:", error);
@@ -36,7 +38,7 @@ const EmployeeSupportChat = () => {
     const initChat = async () => {
       try {
         const res = await axios.post(
-          "http://localhost:3000/chat/conversation",
+          "https://worknest-u174.onrender.com/chat/conversation",
           {
             employeeUid: user.uid,
             adminUid,
@@ -47,7 +49,7 @@ const EmployeeSupportChat = () => {
         setConversationId(convId);
 
         const msgRes = await axios.get(
-          `http://localhost:3000/chat/messages/${convId}`
+          `https://worknest-u174.onrender.com/chat/messages/${convId}`
         );
 
         setMessages(msgRes.data || []);

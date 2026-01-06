@@ -15,16 +15,19 @@ const GuestVerify = () => {
     const verifyToken = async () => {
       try {
         const response = await axios.get(
-          `http://localhost:3000/api/guest/verify/${token}`
+          `https://worknest-u174.onrender.com/api/guest/verify/${token}`
         );
 
         if (response.data.success) {
           setStatus("success");
           setGuestData(response.data.guest);
-          
+
           // Store guest info in session storage
           sessionStorage.setItem("guestMode", "true");
-          sessionStorage.setItem("guestData", JSON.stringify(response.data.guest));
+          sessionStorage.setItem(
+            "guestData",
+            JSON.stringify(response.data.guest)
+          );
         }
       } catch (err) {
         console.error("Error verifying token:", err);
@@ -79,18 +82,17 @@ const GuestVerify = () => {
           <div className="inline-flex items-center justify-center w-20 h-20 rounded-full bg-red-100 mb-6">
             <XCircle className="w-12 h-12 text-red-600" />
           </div>
-          
+
           <h1 className="text-2xl font-bold text-foreground mb-3">
             Access Denied
           </h1>
-          
-          <p className="text-muted-foreground mb-6">
-            {error}
-          </p>
+
+          <p className="text-muted-foreground mb-6">{error}</p>
 
           <div className="bg-red-50 border border-red-200 rounded-lg p-4 mb-6">
             <p className="text-sm text-red-700">
-              Your access token may have expired or is invalid. Please request a new guest access.
+              Your access token may have expired or is invalid. Please request a
+              new guest access.
             </p>
           </div>
 
@@ -120,11 +122,11 @@ const GuestVerify = () => {
           <div className="inline-flex items-center justify-center w-20 h-20 rounded-full bg-green-100 mb-6">
             <CheckCircle className="w-12 h-12 text-green-600" />
           </div>
-          
+
           <h1 className="text-3xl font-bold text-foreground mb-3">
             Access Verified! 🎉
           </h1>
-          
+
           <p className="text-muted-foreground mb-6">
             Welcome, <strong>{guestData?.fullName}</strong>!
           </p>
@@ -133,9 +135,7 @@ const GuestVerify = () => {
             <p className="text-sm text-muted-foreground mb-2">
               You're being redirected to the demo dashboard in
             </p>
-            <p className="text-4xl font-bold text-primary">
-              {countdown}
-            </p>
+            <p className="text-4xl font-bold text-primary">{countdown}</p>
           </div>
 
           <button
@@ -147,7 +147,8 @@ const GuestVerify = () => {
 
           {guestData?.accessExpiresAt && (
             <p className="text-xs text-muted-foreground mt-4">
-              Your access expires: {new Date(guestData.accessExpiresAt).toLocaleString()}
+              Your access expires:{" "}
+              {new Date(guestData.accessExpiresAt).toLocaleString()}
             </p>
           )}
         </div>

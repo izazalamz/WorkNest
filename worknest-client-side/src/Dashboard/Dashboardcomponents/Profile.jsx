@@ -24,7 +24,7 @@ const Profile = () => {
     if (!user?.uid) return;
 
     axios
-      .get(`http://localhost:3000/users/${user.uid}`)
+      .get(`https://worknest-u174.onrender.com/users/${user.uid}`)
       .then((res) => {
         const u = res.data.user;
         setFormData({
@@ -49,7 +49,10 @@ const Profile = () => {
     setLoading(true);
 
     try {
-      await axios.put(`http://localhost:3000/users/${user.uid}`, formData);
+      await axios.put(
+        `https://worknest-u174.onrender.com/users/${user.uid}`,
+        formData
+      );
       setSuccess("Profile updated successfully");
     } catch (err) {
       setError("Failed to update profile");

@@ -22,7 +22,7 @@ const MyBookings = () => {
 
       try {
         const res = await axios.get(
-          `http://localhost:3000/api/bookings/my?uid=${user.uid}`
+          `https://worknest-u174.onrender.com/api/bookings/my?uid=${user.uid}`
         );
 
         console.log("Bookings API response:", res.data);
@@ -52,7 +52,7 @@ const MyBookings = () => {
   const checkInBooking = async (booking) => {
     try {
       const response = await axios.patch(
-        `http://localhost:3000/api/bookings/${booking._id}/check-in`
+        `https://worknest-u174.onrender.com/api/bookings/${booking._id}/check-in`
       );
 
       if (response.data?.success) {
@@ -62,7 +62,7 @@ const MyBookings = () => {
         // Refresh bookings to update the list
         if (user?.uid) {
           const res = await axios.get(
-            `http://localhost:3000/api/bookings/my?uid=${user.uid}`
+            `https://worknest-u174.onrender.com/api/bookings/my?uid=${user.uid}`
           );
           setPastBookings(res.data.pastBookings || []);
           setUpcomingBookings(res.data.upcomingBookings || []);
@@ -81,7 +81,7 @@ const MyBookings = () => {
     try {
       /* Cancel booking in backend */
       await axios.patch(
-        `http://localhost:3000/api/bookings/${booking._id}/cancel`
+        `https://worknest-u174.onrender.com/api/bookings/${booking._id}/cancel`
       );
 
       // If we reach here, cancellation was successful
@@ -94,7 +94,7 @@ const MyBookings = () => {
       // Refresh bookings to update the list
       if (user?.uid) {
         const res = await axios.get(
-          `http://localhost:3000/api/bookings/my?uid=${user.uid}`
+          `https://worknest-u174.onrender.com/api/bookings/my?uid=${user.uid}`
         );
         setPastBookings(res.data.pastBookings || []);
         setUpcomingBookings(res.data.upcomingBookings || []);

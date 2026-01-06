@@ -19,7 +19,7 @@ const RequireProfileCompleted = ({ children }) => {
 
     setLoading(true);
     axios
-      .get(`http://localhost:3000/users/${user.uid}`)
+      .get(`https://worknest-u174.onrender.com/users/${user.uid}`)
       .then((res) => {
         setProfile(res.data.user);
         setError(null);
@@ -34,13 +34,15 @@ const RequireProfileCompleted = ({ children }) => {
   }, [user]);
 
   if (loading) return <Loading />;
-  
+
   if (error) {
     return (
       <div className="flex items-center justify-center min-h-screen">
         <div className="text-center">
           <p className="text-red-600 mb-4">Error: {error}</p>
-          <p className="text-gray-600">Please refresh the page or contact support.</p>
+          <p className="text-gray-600">
+            Please refresh the page or contact support.
+          </p>
         </div>
       </div>
     );

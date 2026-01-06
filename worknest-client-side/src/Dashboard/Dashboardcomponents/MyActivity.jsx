@@ -44,7 +44,7 @@ const MyActivity = () => {
   const fetchUserData = async () => {
     try {
       const response = await axios.get(
-        `http://localhost:3000/users/${user.uid}`
+        `https://worknest-u174.onrender.com/users/${user.uid}`
       );
       setUserData(response.data.user);
       return response.data.user;
@@ -58,7 +58,7 @@ const MyActivity = () => {
     try {
       console.log(" Fetching attendance data for user:", user.uid);
       const response = await axios.get(
-        `http://localhost:3000/api/attendance/${user.uid}`
+        `https://worknest-u174.onrender.com/api/attendance/${user.uid}`
       );
       const data = response.data.attendance || [];
       console.log("📊 Received attendance data:", data);
@@ -152,7 +152,7 @@ const MyActivity = () => {
       });
 
       const response = await axios.post(
-        "http://localhost:3000/api/attendance/checkin",
+        "https://worknest-u174.onrender.com/api/attendance/checkin",
         {
           employeeId: user.uid,
           employeeName: userData.name,
@@ -214,7 +214,7 @@ const MyActivity = () => {
       console.log("📝 Current status before checkout:", currentStatus);
 
       const response = await axios.put(
-        "http://localhost:3000/api/attendance/checkout",
+        "https://worknest-u174.onrender.com/api/attendance/checkout",
         {
           employeeId: user.uid,
         }
@@ -248,9 +248,12 @@ const MyActivity = () => {
     try {
       if (currentStatus?.checkInTime && currentStatus?.checkOutTime) {
         console.log("Resetting check-in/out times on logout...");
-        await axios.delete("http://localhost:3000/api/attendance/reset", {
-          data: { employeeId: user.uid },
-        });
+        await axios.delete(
+          "https://worknest-u174.onrender.com/api/attendance/reset",
+          {
+            data: { employeeId: user.uid },
+          }
+        );
       }
     } catch (error) {
       console.error("Error during logout reset:", error);

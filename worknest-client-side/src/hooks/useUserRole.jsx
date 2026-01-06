@@ -14,7 +14,7 @@ const useUserRole = () => {
     const fetchRole = async () => {
       try {
         const res = await axios.get(
-          `http://localhost:3000/users/role/${email}`
+          `https://worknest-u174.onrender.com/users/role/${email}`
         );
 
         setRole(res.data.role);

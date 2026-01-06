@@ -70,7 +70,10 @@ const AddWorkspace = () => {
 
     setLoading(true);
     try {
-      await axios.post("http://localhost:3000/dashboard/workspace", formData);
+      await axios.post(
+        "https://worknest-u174.onrender.com/dashboard/workspace",
+        formData
+      );
       navigate("/dashboard");
     } catch (err) {
       console.error(err);

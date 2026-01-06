@@ -24,22 +24,30 @@ const AuthProvider = ({ children }) => {
 
     try {
       // Check if user exists in database
-      const response = await axios.get(`http://localhost:3000/users/${firebaseUser.uid}`);
+      const response = await axios.get(
+        `https://worknest-u174.onrender.com/users/${firebaseUser.uid}`
+      );
       console.log("User exists in database:", response.data);
     } catch (error) {
       // If user doesn't exist (404), create them
       if (error.response?.status === 404) {
         try {
           console.log("Creating user in database...");
-          const createResponse = await axios.post('http://localhost:3000/users', {
-            uid: firebaseUser.uid,
-            name: firebaseUser.displayName || firebaseUser.email?.split('@')[0] || 'User',
-            email: firebaseUser.email,
-            photoURL: firebaseUser.photoURL || null,
-            role: 'employee',
-            profileCompleted: false,
-            isActive: true
-          });
+          const createResponse = await axios.post(
+            "https://worknest-u174.onrender.com/users",
+            {
+              uid: firebaseUser.uid,
+              name:
+                firebaseUser.displayName ||
+                firebaseUser.email?.split("@")[0] ||
+                "User",
+              email: firebaseUser.email,
+              photoURL: firebaseUser.photoURL || null,
+              role: "employee",
+              profileCompleted: false,
+              isActive: true,
+            }
+          );
           console.log("User created successfully:", createResponse.data);
         } catch (createError) {
           console.error("Error creating user in database:", createError);
@@ -53,7 +61,11 @@ const AuthProvider = ({ children }) => {
   const createUser = async (email, password) => {
     setLoading(true);
     try {
-      const result = await createUserWithEmailAndPassword(auth, email, password);
+      const result = await createUserWithEmailAndPassword(
+        auth,
+        email,
+        password
+      );
       // Sync to database after creation
       await syncUserToDatabase(result.user);
       return result;
@@ -101,12 +113,12 @@ const AuthProvider = ({ children }) => {
   useEffect(() => {
     const unSubscribe = onAuthStateChanged(auth, async (currentUser) => {
       console.log("Auth state changed:", currentUser?.email);
-      
+
       if (currentUser) {
         // Sync user to database when auth state changes
         await syncUserToDatabase(currentUser);
       }
-      
+
       setUser(currentUser);
       setLoading(false);
     });
@@ -126,9 +138,7 @@ const AuthProvider = ({ children }) => {
   };
 
   return (
-    <AuthContext.Provider value={userInfo}>
-      {children}
-    </AuthContext.Provider>
+    <AuthContext.Provider value={userInfo}>{children}</AuthContext.Provider>
   );
 };
 

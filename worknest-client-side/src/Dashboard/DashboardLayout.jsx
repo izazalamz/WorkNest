@@ -72,7 +72,7 @@ const DashboardLayout = () => {
     if (!user?.uid) return;
 
     axios
-      .get(`http://localhost:3000/users/${user.uid}`)
+      .get(`https://worknest-u174.onrender.com/users/${user.uid}`)
       .then((res) => {
         const u = res.data.user;
         setUserData({

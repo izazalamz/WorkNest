@@ -67,7 +67,7 @@ const DashboardLayout = () => {
     if (!user?.uid) return;
 
     axios
-      .get(`http://localhost:3000/users/${user.uid}`)
+      .get(`https://worknest-u174.onrender.com/users/${user.uid}`)
       .then((res) => {
         const u = res.data.user;
         setUserData({
@@ -279,7 +279,10 @@ const DashboardLayout = () => {
                   <Users size={20} />
                   <span className="font-medium">All Users</span>
                 </NavLink>
-                <NavLink to="/dashboard/guest-management" className={linkClasses}>
+                <NavLink
+                  to="/dashboard/guest-management"
+                  className={linkClasses}
+                >
                   <UserCheck size={20} />
                   <span className="font-medium">Guest Management</span>
                 </NavLink>
@@ -287,7 +290,10 @@ const DashboardLayout = () => {
                   <PlusSquare size={20} />
                   <span className="font-medium">Add Workspace</span>
                 </NavLink>
-                <NavLink to="/dashboard/manage-workspace" className={linkClasses}>
+                <NavLink
+                  to="/dashboard/manage-workspace"
+                  className={linkClasses}
+                >
                   <Settings size={20} />
                   <span className="font-medium">Manage Workspace</span>
                 </NavLink>

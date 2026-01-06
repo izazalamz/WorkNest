@@ -23,7 +23,7 @@ const MeetingRooms = () => {
     const fetchRooms = async () => {
       try {
         const res = await axios.get(
-          "http://localhost:3000/dashboard/workspace"
+          "https://worknest-u174.onrender.com/dashboard/workspace"
         );
 
         // Backend returns { success: true, workspaces: [...] }
@@ -77,7 +77,7 @@ const MeetingRooms = () => {
       }
 
       // ---------- POST booking to backend (no Google Calendar) ----------
-      await axios.post("http://localhost:3000/api/bookings", {
+      await axios.post("https://worknest-u174.onrender.com/api/bookings", {
         workspaceId: room._id,
         startAt: start.toISOString(),
         endAt: end.toISOString(),
@@ -190,7 +190,7 @@ const MeetingRooms = () => {
                 min={new Date().toISOString().split("T")[0]}
                 required
                 onChange={handleChange}
-                className="w-full border px-3 py-2 rounded"
+                className="w-full text-foreground border px-3 py-2 rounded"
               />
 
               <input
@@ -203,7 +203,7 @@ const MeetingRooms = () => {
                 }
                 required
                 onChange={handleChange}
-                className="w-full border px-3 py-2 rounded"
+                className="w-full border text-foreground px-3 py-2 rounded"
               />
 
               <input
@@ -211,7 +211,7 @@ const MeetingRooms = () => {
                 name="endTime"
                 required
                 onChange={handleChange}
-                className="w-full border px-3 py-2 rounded"
+                className="w-full border text-foreground px-3 py-2 rounded"
               />
 
               <button
@@ -224,7 +224,7 @@ const MeetingRooms = () => {
               <button
                 type="button"
                 onClick={() => setBookingRoom(null)}
-                className="w-full rounded bg-gray-800 py-2 text-white"
+                className="w-full rounded bg-gray-800 py-2 text-background"
               >
                 Cancel
               </button>

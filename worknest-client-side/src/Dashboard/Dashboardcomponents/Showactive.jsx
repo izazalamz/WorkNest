@@ -31,7 +31,7 @@ export default function ShowActive() {
     try {
       setLoading(true);
       const response = await fetch(
-        "http://localhost:3000/api/attendance/active-today"
+        "https://worknest-u174.onrender.com/api/attendance/active-today"
       );
 
       if (!response.ok) {

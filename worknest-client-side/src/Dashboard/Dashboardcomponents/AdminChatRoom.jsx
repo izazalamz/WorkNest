@@ -15,7 +15,7 @@ const AdminChatRoom = () => {
     if (!user) return;
 
     axios
-      .get(`http://localhost:3000/chat/admin/${user.uid}`)
+      .get(`https://worknest-u174.onrender.com/chat/admin/${user.uid}`)
       .then((res) => setConversations(res.data))
       .catch(console.error);
   }, [user]);
@@ -27,7 +27,9 @@ const AdminChatRoom = () => {
     socket.emit("joinConversation", activeConversation._id);
 
     axios
-      .get(`http://localhost:3000/chat/messages/${activeConversation._id}`)
+      .get(
+        `https://worknest-u174.onrender.com/chat/messages/${activeConversation._id}`
+      )
       .then((res) => setMessages(res.data))
       .catch(console.error);
   }, [activeConversation]);

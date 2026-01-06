@@ -21,7 +21,7 @@ const Analytics = () => {
         setError("");
 
         const res = await fetch(
-          "http://localhost:3000/api/dashboard/analytics/latest"
+          "https://worknest-u174.onrender.com/api/dashboard/analytics/latest"
         );
         const data = await res.json();
 

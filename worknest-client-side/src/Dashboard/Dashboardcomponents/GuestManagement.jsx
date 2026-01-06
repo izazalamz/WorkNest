@@ -30,8 +30,8 @@ const GuestManagement = () => {
     try {
       const endpoint =
         filterStatus === "all"
-          ? "http://localhost:3000/api/guest/admin/all"
-          : `http://localhost:3000/api/guest/admin/all?status=${filterStatus}`;
+          ? "https://worknest-u174.onrender.com/api/guest/admin/all"
+          : `https://worknest-u174.onrender.com/api/guest/admin/all?status=${filterStatus}`;
 
       const response = await axios.get(endpoint);
 
@@ -61,7 +61,7 @@ const GuestManagement = () => {
     setActionLoading(guestId);
     try {
       const response = await axios.patch(
-        `http://localhost:3000/api/guest/admin/${guestId}/approve`,
+        `https://worknest-u174.onrender.com/api/guest/admin/${guestId}/approve`,
         { adminId: user?.uid }
       );
 
@@ -85,7 +85,7 @@ const GuestManagement = () => {
     setActionLoading(guestId);
     try {
       const response = await axios.patch(
-        `http://localhost:3000/api/guest/admin/${guestId}/reject`,
+        `https://worknest-u174.onrender.com/api/guest/admin/${guestId}/reject`,
         {
           adminId: user?.uid,
           rejectionReason: reason || "Not specified",

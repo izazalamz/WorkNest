@@ -1,6 +1,13 @@
 import { useState } from "react";
 import { useNavigate } from "react-router";
-import { Mail, User, Building2, Phone, ArrowRight, CheckCircle } from "lucide-react";
+import {
+  Mail,
+  User,
+  Building2,
+  Phone,
+  ArrowRight,
+  CheckCircle,
+} from "lucide-react";
 import axios from "axios";
 
 const GuestRequest = () => {
@@ -45,7 +52,7 @@ const GuestRequest = () => {
 
     try {
       const response = await axios.post(
-        "http://localhost:3000/api/guest/request",
+        "https://worknest-u174.onrender.com/api/guest/request",
         formData
       );
 
@@ -55,7 +62,8 @@ const GuestRequest = () => {
     } catch (err) {
       console.error("Error submitting guest request:", err);
       setError(
-        err.response?.data?.message || "Failed to submit request. Please try again."
+        err.response?.data?.message ||
+          "Failed to submit request. Please try again."
       );
     } finally {
       setLoading(false);
@@ -71,29 +79,39 @@ const GuestRequest = () => {
               <div className="inline-flex items-center justify-center w-20 h-20 rounded-full bg-green-100 mb-6">
                 <CheckCircle className="w-12 h-12 text-green-600" />
               </div>
-              
+
               <h1 className="text-3xl md:text-4xl font-bold text-foreground mb-4">
                 Request Submitted! 🎉
               </h1>
-              
+
               <p className="text-lg text-muted-foreground mb-6">
                 Thank you for your interest in WorkNest!
               </p>
 
               <div className="bg-primary/5 border border-primary/20 rounded-lg p-6 mb-8">
-                <h3 className="font-semibold text-foreground mb-3">What happens next?</h3>
+                <h3 className="font-semibold text-foreground mb-3">
+                  What happens next?
+                </h3>
                 <ul className="text-left space-y-2 text-muted-foreground">
                   <li className="flex items-start gap-2">
                     <span className="text-primary mt-1">✓</span>
-                    <span>We've sent a confirmation email to <strong>{formData.email}</strong></span>
+                    <span>
+                      We've sent a confirmation email to{" "}
+                      <strong>{formData.email}</strong>
+                    </span>
                   </li>
                   <li className="flex items-start gap-2">
                     <span className="text-primary mt-1">✓</span>
-                    <span>Our team will review your request within 24 hours</span>
+                    <span>
+                      Our team will review your request within 24 hours
+                    </span>
                   </li>
                   <li className="flex items-start gap-2">
                     <span className="text-primary mt-1">✓</span>
-                    <span>You'll receive another email with demo access once approved</span>
+                    <span>
+                      You'll receive another email with demo access once
+                      approved
+                    </span>
                   </li>
                 </ul>
               </div>
@@ -146,7 +164,10 @@ const GuestRequest = () => {
 
             {/* Full Name */}
             <div>
-              <label htmlFor="fullName" className="block text-sm font-medium text-foreground mb-2">
+              <label
+                htmlFor="fullName"
+                className="block text-sm font-medium text-foreground mb-2"
+              >
                 Full Name <span className="text-red-500">*</span>
               </label>
               <div className="relative">
@@ -166,7 +187,10 @@ const GuestRequest = () => {
 
             {/* Email */}
             <div>
-              <label htmlFor="email" className="block text-sm font-medium text-foreground mb-2">
+              <label
+                htmlFor="email"
+                className="block text-sm font-medium text-foreground mb-2"
+              >
                 Email Address <span className="text-red-500">*</span>
               </label>
               <div className="relative">
@@ -186,8 +210,14 @@ const GuestRequest = () => {
 
             {/* Company (Optional) */}
             <div>
-              <label htmlFor="company" className="block text-sm font-medium text-foreground mb-2">
-                Company <span className="text-muted-foreground text-xs">(Optional)</span>
+              <label
+                htmlFor="company"
+                className="block text-sm font-medium text-foreground mb-2"
+              >
+                Company{" "}
+                <span className="text-muted-foreground text-xs">
+                  (Optional)
+                </span>
               </label>
               <div className="relative">
                 <Building2 className="absolute left-3 top-1/2 transform -translate-y-1/2 w-5 h-5 text-muted-foreground" />
@@ -205,8 +235,14 @@ const GuestRequest = () => {
 
             {/* Phone (Optional) */}
             <div>
-              <label htmlFor="phone" className="block text-sm font-medium text-foreground mb-2">
-                Phone Number <span className="text-muted-foreground text-xs">(Optional)</span>
+              <label
+                htmlFor="phone"
+                className="block text-sm font-medium text-foreground mb-2"
+              >
+                Phone Number{" "}
+                <span className="text-muted-foreground text-xs">
+                  (Optional)
+                </span>
               </label>
               <div className="relative">
                 <Phone className="absolute left-3 top-1/2 transform -translate-y-1/2 w-5 h-5 text-muted-foreground" />
@@ -225,8 +261,10 @@ const GuestRequest = () => {
             {/* Info Box */}
             <div className="bg-primary/5 border border-primary/20 rounded-lg p-4">
               <p className="text-sm text-muted-foreground">
-                <strong className="text-foreground">Note:</strong> You'll receive an email confirmation once you submit this form. 
-                Our team will review your request and send you demo access credentials within 24 hours.
+                <strong className="text-foreground">Note:</strong> You'll
+                receive an email confirmation once you submit this form. Our
+                team will review your request and send you demo access
+                credentials within 24 hours.
               </p>
             </div>
 
@@ -249,7 +287,7 @@ const GuestRequest = () => {
                   </>
                 )}
               </button>
-              
+
               <button
                 type="button"
                 onClick={() => navigate("/")}
