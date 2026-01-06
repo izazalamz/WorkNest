@@ -5,7 +5,8 @@ import DeskUsageChart from "../AnalyticsComponents/DeskUsageChart";
 import SpaceTypePieChart from "../AnalyticsComponents/SpaceTypePieChart";
 import MeetingFrequencyChart from "../AnalyticsComponents/MeetingFrequencyChart";
 import AttendanceTrendChart from "../AnalyticsComponents/AttendanceTrendChart";
-import OfficeLocationMap from "../AnalyticsComponents/OfficeLocationMap"; // if you need it
+import OfficeLocationMap from "../AnalyticsComponents/OfficeLocationMap";
+import Loading from "../../components/Loading";
 
 const Analytics = () => {
   const [analytics, setAnalytics] = useState(null);
@@ -19,7 +20,9 @@ const Analytics = () => {
         setLoading(true);
         setError("");
 
-        const res = await fetch("http://localhost:3000/api/dashboard/analytics/latest");
+        const res = await fetch(
+          "http://localhost:3000/api/dashboard/analytics/latest"
+        );
         const data = await res.json();
 
         if (!res.ok || !data.success) {
@@ -30,7 +33,9 @@ const Analytics = () => {
         setSummary(data.summary);
       } catch (err) {
         console.error("Analytics fetch error:", err);
-        setError(err.message || "Something went wrong while fetching analytics.");
+        setError(
+          err.message || "Something went wrong while fetching analytics."
+        );
       } finally {
         setLoading(false);
       }
@@ -58,7 +63,7 @@ const Analytics = () => {
       };
     }, [summary]);
 
-  if (loading) return <p>Loading analytics...</p>;
+  if (loading) return <Loading />;
   if (error) return <p>Error: {error}</p>;
 
   return (

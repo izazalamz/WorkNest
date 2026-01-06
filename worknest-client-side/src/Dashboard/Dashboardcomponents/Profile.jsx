@@ -2,6 +2,7 @@ import { useContext, useEffect, useState } from "react";
 import { User, Building2, Briefcase, Camera, Save } from "lucide-react";
 import axios from "axios";
 import { AuthContext } from "../../contexts/AuthContext";
+import Loading from "../../components/Loading";
 
 const Profile = () => {
   const { user } = useContext(AuthContext);
@@ -187,7 +188,7 @@ const Profile = () => {
                 className="flex items-center justify-center gap-2 w-full h-12 rounded-lg bg-primary text-primary-foreground font-semibold hover:bg-primary/90 transition"
               >
                 {loading ? (
-                  <div className="w-5 h-5 border-2 border-white border-t-transparent rounded-full animate-spin" />
+                  <Loading />
                 ) : (
                   <>
                     <Save className="w-4 h-4" />

@@ -1,6 +1,6 @@
 const Workspace = require("../models/workspaceModel");
 
-// ✅ Create a new workspace
+// Create a new workspace
 const createWorkspace = async (req, res) => {
   try {
     const {
@@ -46,7 +46,7 @@ const createWorkspace = async (req, res) => {
   }
 };
 
-// ✅ Get all workspaces
+// Get all workspaces
 const getAllWorkspaces = async (req, res) => {
   try {
     const allWorkspaces = await Workspace.find();
@@ -60,18 +60,11 @@ const getAllWorkspaces = async (req, res) => {
   }
 };
 
-// ✅ Update workspace (general update for name, type, location, capacity, amenities)
+// Update workspace (general update for name, type, location, capacity, amenities)
 const updateWorkspace = async (req, res) => {
   try {
     const { id } = req.params;
-    const {
-      name,
-      type,
-      location,
-      capacity,
-      amenities,
-      status,
-    } = req.body;
+    const { name, type, location, capacity, amenities, status } = req.body;
 
     // Build update object with only provided fields
     const updateData = {};
@@ -89,11 +82,10 @@ const updateWorkspace = async (req, res) => {
     if (amenities !== undefined) updateData.amenities = amenities;
     if (status !== undefined) updateData.status = status;
 
-    const updatedWorkspace = await Workspace.findByIdAndUpdate(
-      id,
-      updateData,
-      { new: true, runValidators: true }
-    );
+    const updatedWorkspace = await Workspace.findByIdAndUpdate(id, updateData, {
+      new: true,
+      runValidators: true,
+    });
 
     if (!updatedWorkspace) {
       return res.status(404).json({
@@ -116,7 +108,7 @@ const updateWorkspace = async (req, res) => {
   }
 };
 
-// ✅ Delete workspace
+//  Delete workspace
 const deleteWorkspace = async (req, res) => {
   try {
     const { id } = req.params;
@@ -159,7 +151,7 @@ const deleteWorkspace = async (req, res) => {
   }
 };
 
-// ✅ Update workspace status + startAt/endAt/Google event
+//  Update workspace status + startAt/endAt/Google event
 const updateWorkspaceStatus = async (req, res) => {
   try {
     const { id } = req.params;

@@ -2,6 +2,7 @@ import React, { useEffect, useState, useContext } from "react";
 import axios from "axios";
 import { toast } from "react-toastify";
 import { AuthContext } from "../../contexts/AuthContext";
+import Loading from "../../components/Loading";
 
 const DeskBooking = () => {
   const { user } = useContext(AuthContext);
@@ -21,12 +22,14 @@ const DeskBooking = () => {
   useEffect(() => {
     const fetchDesks = async () => {
       try {
-        const res = await axios.get("http://localhost:3000/dashboard/workspace");
+        const res = await axios.get(
+          "http://localhost:3000/dashboard/workspace"
+        );
 
         // Backend returns { success: true, workspaces: [...] }
         const allWorkspaces = res.data.workspaces || [];
         console.log("All workspaces from API:", allWorkspaces);
-        
+
         // Filter for desks - show active desks, or all desks if status filter is too strict
         const deskList = allWorkspaces.filter(
           (d) => d.type === "desk" && (d.status === "active" || !d.status)
@@ -55,7 +58,9 @@ const DeskBooking = () => {
 
     try {
       // Time input already provides 24-hour format (HH:MM)
-      const [startHours, startMinutes] = bookingData.startTime.split(":").map(Number);
+      const [startHours, startMinutes] = bookingData.startTime
+        .split(":")
+        .map(Number);
       const [endHours, endMinutes] = bookingData.endTime.split(":").map(Number);
 
       const start = new Date(bookingData.date);
@@ -85,12 +90,13 @@ const DeskBooking = () => {
       toast.success("Desk booked successfully!");
     } catch (err) {
       console.error("Booking error:", err);
-      const errorMessage = err.response?.data?.message || err.message || "Booking failed";
+      const errorMessage =
+        err.response?.data?.message || err.message || "Booking failed";
       toast.error(errorMessage);
     }
   };
 
-  if (loading) return <p className="text-center mt-10">Loading desks...</p>;
+  if (loading) return <Loading />;
 
   /* ---------------- UI ---------------- */
   return (
@@ -148,16 +154,17 @@ const DeskBooking = () => {
               <strong>Capacity:</strong> {detailsDesk.capacity}
             </p>
 
-            {detailsDesk.amenities?.length > 0 && detailsDesk.amenities[0] !== "" && (
-              <div className="mt-3">
-                <strong>Amenities:</strong>
-                <ul className="list-disc ml-5 mt-1">
-                  {detailsDesk.amenities.map((a, i) => (
-                    <li key={i}>{a}</li>
-                  ))}
-                </ul>
-              </div>
-            )}
+            {detailsDesk.amenities?.length > 0 &&
+              detailsDesk.amenities[0] !== "" && (
+                <div className="mt-3">
+                  <strong>Amenities:</strong>
+                  <ul className="list-disc ml-5 mt-1">
+                    {detailsDesk.amenities.map((a, i) => (
+                      <li key={i}>{a}</li>
+                    ))}
+                  </ul>
+                </div>
+              )}
 
             <button
               onClick={() => setDetailsDesk(null)}
@@ -175,7 +182,10 @@ const DeskBooking = () => {
           <div className="bg-white rounded-xl p-6 w-full max-w-md">
             <h2 className="text-xl font-bold mb-4">Book {bookingDesk.name}</h2>
 
-            <form onSubmit={(e) => handleSubmit(e, bookingDesk)} className="space-y-3">
+            <form
+              onSubmit={(e) => handleSubmit(e, bookingDesk)}
+              className="space-y-3"
+            >
               <input
                 type="date"
                 name="date"
@@ -206,7 +216,10 @@ const DeskBooking = () => {
                 className="w-full border px-3 py-2 rounded"
               />
 
-              <button type="submit" className="w-full rounded bg-green-600 py-2 text-white">
+              <button
+                type="submit"
+                className="w-full rounded bg-green-600 py-2 text-white"
+              >
                 Confirm Booking
               </button>
 
@@ -226,4 +239,3 @@ const DeskBooking = () => {
 };
 
 export default DeskBooking;
-

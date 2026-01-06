@@ -3,6 +3,7 @@ import axios from "axios";
 import { toast } from "react-toastify";
 import { AuthContext } from "../../contexts/AuthContext";
 import { Calendar, Clock, MapPin, Building2, Users } from "lucide-react";
+import Loading from "../../components/Loading";
 
 const MyBookings = () => {
   const { user } = useContext(AuthContext);
@@ -25,13 +26,15 @@ const MyBookings = () => {
         );
 
         console.log("Bookings API response:", res.data);
-        
+
         // Module 4, Requirement 4: Separate past and upcoming bookings
         const past = res.data.pastBookings || [];
         const upcoming = res.data.upcomingBookings || [];
-        
-        console.log(`Received ${past.length} past bookings and ${upcoming.length} upcoming bookings`);
-        
+
+        console.log(
+          `Received ${past.length} past bookings and ${upcoming.length} upcoming bookings`
+        );
+
         setPastBookings(past);
         setUpcomingBookings(upcoming);
       } catch (err) {
@@ -55,7 +58,7 @@ const MyBookings = () => {
       if (response.data?.success) {
         toast.success("Checked in successfully!");
         setDetailsItem(null);
-        
+
         // Refresh bookings to update the list
         if (user?.uid) {
           const res = await axios.get(
@@ -67,7 +70,8 @@ const MyBookings = () => {
       }
     } catch (err) {
       console.error("Check-in error:", err);
-      const errorMessage = err.response?.data?.message || err.message || "Failed to check in";
+      const errorMessage =
+        err.response?.data?.message || err.message || "Failed to check in";
       toast.error(errorMessage);
     }
   };
@@ -82,13 +86,11 @@ const MyBookings = () => {
 
       // If we reach here, cancellation was successful
       // Remove from upcoming bookings
-      setUpcomingBookings((prev) =>
-        prev.filter((b) => b._id !== booking._id)
-      );
+      setUpcomingBookings((prev) => prev.filter((b) => b._id !== booking._id));
       setDetailsItem(null);
 
       toast.success("Booking cancelled successfully");
-      
+
       // Refresh bookings to update the list
       if (user?.uid) {
         const res = await axios.get(
@@ -99,17 +101,15 @@ const MyBookings = () => {
       }
     } catch (err) {
       console.error("Cancel booking error:", err);
-      const errorMessage = err.response?.data?.message || err.message || "Failed to cancel booking";
+      const errorMessage =
+        err.response?.data?.message ||
+        err.message ||
+        "Failed to cancel booking";
       toast.error(errorMessage);
     }
   };
 
-  if (loading)
-    return (
-      <div className="flex items-center justify-center min-h-[400px]">
-        <p className="text-center text-gray-600">Loading bookings...</p>
-      </div>
-    );
+  if (loading) return <Loading />;
 
   const totalBookings = pastBookings.length + upcomingBookings.length;
   if (totalBookings === 0)
@@ -135,8 +135,10 @@ const MyBookings = () => {
     const workspaceType = booking.workspaceId?.type || "Unknown";
     const isDesk = workspaceType.toLowerCase() === "desk";
     // Handle both "meeting-room" and "meeting room" formats
-    const isMeetingRoom = workspaceType.toLowerCase() === "meeting-room" || workspaceType.toLowerCase() === "meeting room";
-    
+    const isMeetingRoom =
+      workspaceType.toLowerCase() === "meeting-room" ||
+      workspaceType.toLowerCase() === "meeting room";
+
     return (
       <div
         key={booking._id}
@@ -170,9 +172,11 @@ const MyBookings = () => {
                 : "bg-blue-100 text-blue-700"
             }`}
           >
-            {booking.status === "checked_in" ? "Checked In" : 
-             booking.status === "no_show" ? "No Show" :
-             booking.status}
+            {booking.status === "checked_in"
+              ? "Checked In"
+              : booking.status === "no_show"
+              ? "No Show"
+              : booking.status}
           </span>
         </div>
 
@@ -219,23 +223,27 @@ const MyBookings = () => {
         </div>
 
         <div className="flex gap-2">
-          {booking.status === "confirmed" && 
-           new Date(booking.startAt) <= new Date() && 
-           new Date(booking.endAt) > new Date() &&
-           !booking.check?.checkInAt && (
-            <button
-              onClick={() => checkInBooking(booking)}
-              className="flex-1 rounded-lg bg-green-600 py-2 text-white text-sm font-medium hover:bg-green-700 transition-colors"
-            >
-              Check In
-            </button>
-          )}
+          {booking.status === "confirmed" &&
+            new Date(booking.startAt) <= new Date() &&
+            new Date(booking.endAt) > new Date() &&
+            !booking.check?.checkInAt && (
+              <button
+                onClick={() => checkInBooking(booking)}
+                className="flex-1 rounded-lg bg-green-600 py-2 text-white text-sm font-medium hover:bg-green-700 transition-colors"
+              >
+                Check In
+              </button>
+            )}
           <button
             onClick={() => setDetailsItem(booking)}
-            className={`${booking.status === "confirmed" && 
-              new Date(booking.startAt) <= new Date() && 
+            className={`${
+              booking.status === "confirmed" &&
+              new Date(booking.startAt) <= new Date() &&
               new Date(booking.endAt) > new Date() &&
-              !booking.check?.checkInAt ? "flex-1" : "w-full"} rounded-lg bg-indigo-600 py-2 text-white text-sm font-medium hover:bg-indigo-700 transition-colors`}
+              !booking.check?.checkInAt
+                ? "flex-1"
+                : "w-full"
+            } rounded-lg bg-indigo-600 py-2 text-white text-sm font-medium hover:bg-indigo-700 transition-colors`}
           >
             View Details
           </button>
@@ -257,7 +265,9 @@ const MyBookings = () => {
       {/* Upcoming Bookings Section */}
       <div className="mb-12">
         <div className="flex items-center gap-2 mb-6">
-          <h2 className="text-2xl font-bold text-gray-800">Upcoming Bookings</h2>
+          <h2 className="text-2xl font-bold text-gray-800">
+            Upcoming Bookings
+          </h2>
           <span className="px-3 py-1 bg-green-100 text-green-700 rounded-full text-sm font-medium">
             {upcomingBookings.length}
           </span>
@@ -390,9 +400,11 @@ const MyBookings = () => {
                       : "bg-blue-100 text-blue-700"
                   }`}
                 >
-                  {detailsItem.status === "checked_in" ? "Checked In" : 
-                   detailsItem.status === "no_show" ? "No Show" :
-                   detailsItem.status}
+                  {detailsItem.status === "checked_in"
+                    ? "Checked In"
+                    : detailsItem.status === "no_show"
+                    ? "No Show"
+                    : detailsItem.status}
                 </span>
               </div>
 
@@ -400,14 +412,17 @@ const MyBookings = () => {
                 <div>
                   <p className="text-sm text-gray-500">Checked In At</p>
                   <p className="font-medium text-gray-800">
-                    {new Date(detailsItem.check.checkInAt).toLocaleString("en-US", {
-                      weekday: "long",
-                      year: "numeric",
-                      month: "long",
-                      day: "numeric",
-                      hour: "2-digit",
-                      minute: "2-digit",
-                    })}
+                    {new Date(detailsItem.check.checkInAt).toLocaleString(
+                      "en-US",
+                      {
+                        weekday: "long",
+                        year: "numeric",
+                        month: "long",
+                        day: "numeric",
+                        hour: "2-digit",
+                        minute: "2-digit",
+                      }
+                    )}
                   </p>
                 </div>
               )}

@@ -53,7 +53,7 @@ const visitorSchema = new mongoose.Schema(
       lastError: { type: String },
     },
 
-    // ===== NEW FIELDS FOR GUEST MODE =====
+    //  NEW FIELDS FOR GUEST MODE
     // Guest mode flag
     isGuestMode: {
       type: Boolean,

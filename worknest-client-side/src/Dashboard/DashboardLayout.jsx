@@ -1,5 +1,5 @@
 import { useState, useEffect, useContext } from "react";
-import { NavLink, Outlet, useNavigate } from "react-router";
+import { Link, NavLink, Outlet, useNavigate } from "react-router";
 
 import {
   Activity,
@@ -21,6 +21,11 @@ import {
   PlusSquare,
   ChartBar,
   UserCheck,
+  CalendarCheck,
+  LayoutList,
+  UserPlus,
+  History,
+  UsersRound,
 } from "lucide-react";
 import { AuthContext } from "../contexts/AuthContext";
 import useUserRole from "../hooks/useUserRole";
@@ -102,35 +107,23 @@ const DashboardLayout = () => {
             </button>
 
             {/* Logo */}
-            <div className="flex items-center space-x-3">
-              <div className="w-10 h-10 rounded-xl bg-gradient-to-br from-primary to-primary/80 flex items-center justify-center">
-                <Building2 className="w-6 h-6 text-white" />
+            <Link to={"/"}>
+              <div className="flex items-center space-x-3">
+                <div className="w-10 h-10 rounded-xl bg-gradient-to-br from-primary to-primary/80 flex items-center justify-center">
+                  <Building2 className="w-6 h-6 text-white" />
+                </div>
+                <div>
+                  <h1 className="text-xl font-bold text-foreground">
+                    WorkNest
+                  </h1>
+                  <p className="text-xs text-muted-foreground">Dashboard</p>
+                </div>
               </div>
-              <div>
-                <h1 className="text-xl font-bold text-foreground">WorkNest</h1>
-                <p className="text-xs text-muted-foreground">Dashboard</p>
-              </div>
-            </div>
-
-            {/* Search - Desktop only */}
-            <div className="hidden md:block relative">
-              <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 w-5 h-5 text-muted-foreground" />
-              <input
-                type="text"
-                placeholder="Search desks, rooms, team..."
-                className="pl-10 pr-4 py-2 w-64 rounded-lg bg-muted border border-border focus:outline-none focus:ring-2 focus:ring-primary/50"
-              />
-            </div>
+            </Link>
           </div>
 
           {/* Right Section */}
           <div className="flex items-center space-x-4">
-            {/* Notifications */}
-            <button className="relative p-2 rounded-lg hover:bg-muted transition-colors">
-              <Bell className="w-5 h-5 text-foreground" />
-              <span className="absolute top-1.5 right-1.5 w-2 h-2 bg-error rounded-full"></span>
-            </button>
-
             {/* User Dropdown */}
             <div className="relative">
               <button
@@ -140,7 +133,7 @@ const DashboardLayout = () => {
                 <div className="w-10 h-10 rounded-full bg-gradient-to-br from-primary to-primary/80 flex items-center justify-center">
                   {userData.photoURL ? (
                     <img
-                      src={userData.photoURL}
+                      src={userData.photoURL || <User />}
                       alt={userData.name}
                       className="w-full h-full rounded-full object-cover"
                     />
@@ -210,16 +203,6 @@ const DashboardLayout = () => {
       </header>
 
       <div className="flex flex-1 relative">
-        {!sidebarOpen && (
-          <button
-            className="md:hidden p-4 absolute top-2 left-2 z-30 text-primary bg-card rounded-lg shadow"
-            onClick={toggleSidebar}
-            aria-label="Toggle Sidebar"
-          >
-            <Menu size={24} />
-          </button>
-        )}
-
         {/* Sidebar */}
         <aside
           className={`fixed top-0 left-0 z-30 bg-card text-foreground w-64 min-h-screen p-6 transform transition-transform duration-300 ease-in-out border-r border-border
@@ -242,85 +225,99 @@ const DashboardLayout = () => {
 
           {/* Navigation */}
           <nav className="space-y-2 flex-1">
-            {/* Common Links */}
+            {/* Dashboard - Always first */}
             <NavLink to="/dashboard" className={linkClasses} end>
               <LayoutDashboard size={20} />
               <span className="font-medium">Dashboard</span>
             </NavLink>
 
+            {/* Core Features - Next */}
+            <NavLink to="/dashboard/desk-booking" className={linkClasses}>
+              <MapPin size={20} />
+              <span className="font-medium">Desk Booking</span>
+            </NavLink>
+
+            <NavLink to="/dashboard/meeting-rooms" className={linkClasses}>
+              <Calendar size={20} />
+              <span className="font-medium">Meeting Rooms</span>
+            </NavLink>
+
+            {/* Personal Management */}
+            <NavLink to="/dashboard/my-bookings" className={linkClasses}>
+              <CalendarCheck size={20} /> {/* Better than Users */}
+              <span className="font-medium">My Bookings</span>
+            </NavLink>
+
             <NavLink to="/dashboard/nestboard" className={linkClasses}>
-              <LayoutDashboard size={20} />
+              <LayoutList size={20} /> {/* Better than Dashboard duplicate */}
               <span className="font-medium">NestBoard</span>
             </NavLink>
 
-            {/* ✅ Employee-only Links - Show for employees (default to showing unless explicitly admin) */}
-            {role !== "admin" && (
-              <>
-                <NavLink to="/dashboard/desk-booking" className={linkClasses}>
-                  <MapPin size={20} />
-                  <span className="font-medium">Desk Booking</span>
-                </NavLink>
+            {/* Activity & Status */}
+            <NavLink to="/dashboard/active" className={linkClasses}>
+              <UserCheck size={20} />{" "}
+              {/* Better than Users - indicates active status */}
+              <span className="font-medium">Active Status</span>
+            </NavLink>
 
-                <NavLink to="/dashboard/meeting-rooms" className={linkClasses}>
-                  <Calendar size={20} />
-                  <span className="font-medium">Meeting Rooms</span>
-                </NavLink>
+            <NavLink to="/dashboard/activity" className={linkClasses}>
+              <History size={20} /> {/* Better than Activity - clearer */}
+              <span className="font-medium">My Activity</span>
+            </NavLink>
 
-                <NavLink to="/dashboard/my-bookings" className={linkClasses}>
-                  <Users size={20} />
-                  <span className="font-medium">My Bookings</span>
-                </NavLink>
-              </>
-            )}
-
-            {/* Admin-Only Links */}
+            {/* Admin-Only Links - Grouped together */}
             {role === "admin" && (
               <>
+                <div className="pt-2 border-t border-border">
+                  <p className="px-3 py-2 text-xs font-medium text-muted-foreground uppercase tracking-wider">
+                    Admin
+                  </p>
+                </div>
+
                 <NavLink to="/dashboard/allusers" className={linkClasses}>
-                  <Users size={20} />
+                  <Users size={20} /> {/* Good for "All Users" */}
                   <span className="font-medium">All Users</span>
                 </NavLink>
+
                 <NavLink
                   to="/dashboard/guest-management"
                   className={linkClasses}
                 >
-                  <UserCheck size={20} />
+                  <UsersRound size={20} />{" "}
+                  {/* Better for managing multiple users */}
                   <span className="font-medium">Guest Management</span>
                 </NavLink>
+
                 <NavLink to="/dashboard/add-workspace" className={linkClasses}>
-                  <PlusSquare size={20} />
+                  <PlusSquare size={20} /> {/* Perfect for "Add" */}
                   <span className="font-medium">Add Workspace</span>
                 </NavLink>
+
                 <NavLink
                   to="/dashboard/manage-workspace"
                   className={linkClasses}
                 >
-                  <Settings size={20} />
+                  <Settings size={20} /> {/* Good for "Manage" */}
                   <span className="font-medium">Manage Workspace</span>
                 </NavLink>
+
                 <NavLink to="/dashboard/analytics" className={linkClasses}>
-                  <BarChart3 size={20} />
+                  <BarChart3 size={20} /> {/* Perfect for Analytics */}
                   <span className="font-medium">Analytics</span>
                 </NavLink>
+
                 <NavLink to="/dashboard/admin/support" className={linkClasses}>
-                  <ChartBar size={20} />
+                  <HelpCircle size={20} />{" "}
+                  {/* Better than ChartBar for Support */}
                   <span className="font-medium">Support</span>
                 </NavLink>
               </>
             )}
 
-            {/* Common Links - still for everyone */}
+            {/* Profile - Always last */}
             <NavLink to="/dashboard/profile" className={linkClasses}>
-              <User size={20} />
+              <User size={20} /> {/* Perfect for Profile */}
               <span className="font-medium">My Profile</span>
-            </NavLink>
-            <NavLink to="/dashboard/activity" className={linkClasses}>
-              <Activity size={20} />
-              <span className="font-medium">My Activity</span>
-            </NavLink>
-            <NavLink to="/dashboard/active" className={linkClasses}>
-              <Users size={20} />
-              <span className="font-medium">Active Status</span>
             </NavLink>
           </nav>
 
@@ -351,10 +348,10 @@ const DashboardLayout = () => {
           <div className="mt-8 pt-6 border-t border-border">
             <button
               onClick={handleSignOut}
-              className="flex items-center gap-3 text-foreground hover:text-error transition-colors w-full px-3 py-2 rounded-lg hover:bg-muted"
+              className="flex items-center gap-3 text-error transition-colors w-full px-3 py-2 rounded-lg hover:bg-muted"
             >
               <LogOut size={18} />
-              <span className="font-medium">Logout</span>
+              <span className="font-medium">Log Out</span>
             </button>
           </div>
         </aside>

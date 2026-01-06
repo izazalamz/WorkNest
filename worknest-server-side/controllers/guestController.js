@@ -155,7 +155,7 @@ const verifyGuestToken = async (req, res) => {
       await guest.save();
     }
 
-    console.log("✅ Guest verified successfully");
+    console.log(" Guest verified successfully");
 
     res.status(200).json({
       success: true,
@@ -321,7 +321,7 @@ const approveGuestRequest = async (req, res) => {
 
     await guest.save();
 
-    console.log("✅ Guest saved with token:", guest.accessToken);
+    console.log(" Guest saved with token:", guest.accessToken);
 
     // Send approval email with demo dashboard link
     try {
@@ -420,7 +420,8 @@ const rejectGuestRequest = async (req, res) => {
     try {
       await sendTemplatedEmail(guest.email, "guestRejected", {
         name: guest.fullName,
-        reason: rejectionReason || "Your request could not be approved at this time",
+        reason:
+          rejectionReason || "Your request could not be approved at this time",
       });
 
       guest.emailStatus = {

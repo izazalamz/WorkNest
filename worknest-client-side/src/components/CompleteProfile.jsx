@@ -98,30 +98,52 @@ const CompleteProfile = () => {
               Company Name *
             </label>
             <div className="relative">
-              <Building2 className="absolute left-4 top-1/2 -translate-y-1/2 w-5 h-5 text-muted-foreground" />
-              <input
-                type="text"
-                className="w-full h-14 pl-12 pr-4 rounded-xl border border-border bg-background focus:ring-2 focus:ring-primary/40 outline-none"
-                placeholder="Your company"
+              <Building2 className="absolute left-4 top-1/2 -translate-y-1/2 w-5 h-5 text-muted-foreground pointer-events-none" />
+              <select
+                className="w-full h-14 pl-12 pr-4 rounded-xl border border-border bg-background focus:ring-2 focus:ring-primary/40 outline-none appearance-none"
                 value={formData.companyName}
                 onChange={(e) => handleChange("companyName", e.target.value)}
                 required
-              />
+              >
+                <option value="">Select your company</option>
+                <option value="Brain Station 23">Brain Station 23</option>
+                <option value="TigerIT Bangladesh">TigerIT Bangladesh</option>
+                <option value="Southtech Group">Southtech Group</option>
+                <option value="Therap (BD) Ltd">Therap (BD) Ltd</option>
+                <option value="BJIT Group">BJIT Group</option>
+                <option value="Reve Systems">Reve Systems</option>
+                <option value="LeadSoft Bangladesh">LeadSoft Bangladesh</option>
+                <option value="Kaz Software">Kaz Software</option>
+                <option value="Enosis Solutions">Enosis Solutions</option>
+                <option value="Dynamic Solution Innovators (DSi)">
+                  Dynamic Solution Innovators (DSi)
+                </option>
+              </select>
             </div>
           </div>
 
-          {/* Department (optional) */}
+          {/* Department */}
           <div>
             <label className="block text-sm font-medium mb-1">
               Department (optional)
             </label>
-            <input
-              type="text"
+            <select
               className="w-full h-14 px-4 rounded-xl border border-border bg-background focus:ring-2 focus:ring-primary/40 outline-none"
-              placeholder="Engineering, HR, Design..."
               value={formData.department}
               onChange={(e) => handleChange("department", e.target.value)}
-            />
+            >
+              <option value="">Select department</option>
+              <option value="Engineering">Engineering</option>
+              <option value="Product">Product</option>
+              <option value="Design">Design</option>
+              <option value="Quality Assurance">Quality Assurance (QA)</option>
+              <option value="DevOps">DevOps</option>
+              <option value="Human Resources">Human Resources (HR)</option>
+              <option value="Sales & Marketing">Sales & Marketing</option>
+              <option value="Customer Support">Customer Support</option>
+              <option value="Finance">Finance</option>
+              <option value="Operations">Operations</option>
+            </select>
           </div>
 
           {/* Submit */}

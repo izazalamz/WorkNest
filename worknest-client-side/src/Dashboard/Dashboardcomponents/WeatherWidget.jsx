@@ -177,7 +177,7 @@ export default function WeatherWidget() {
   };
 
   return (
-    <div className="bg-card border border-border rounded-xl p-6">
+    <div className="bg-card border border-border min-h-screen rounded-xl p-6">
       {/* Header */}
       <div className="flex items-center justify-between mb-6">
         <div>

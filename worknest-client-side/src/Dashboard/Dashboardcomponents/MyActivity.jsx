@@ -11,6 +11,7 @@ import {
 } from "lucide-react";
 import { AuthContext } from "../../contexts/AuthContext";
 import axios from "axios";
+import Loading from "../../components/Loading";
 
 const MyActivity = () => {
   const { user } = useContext(AuthContext);
@@ -55,7 +56,7 @@ const MyActivity = () => {
 
   const fetchAttendanceData = async () => {
     try {
-      console.log("🔄 Fetching attendance data for user:", user.uid);
+      console.log(" Fetching attendance data for user:", user.uid);
       const response = await axios.get(
         `http://localhost:3000/api/attendance/${user.uid}`
       );
@@ -279,11 +280,7 @@ const MyActivity = () => {
   }, [user?.uid]);
 
   if (loading && attendanceData.length === 0) {
-    return (
-      <div className="flex items-center justify-center h-64">
-        <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-primary"></div>
-      </div>
-    );
+    return <Loading />;
   }
 
   return (

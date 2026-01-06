@@ -5,7 +5,7 @@ const {
   createWorkspace,
   updateWorkspace,
   deleteWorkspace,
-  updateWorkspaceStatus, // 👈 add this
+  updateWorkspaceStatus,
 } = require("../controllers/workspaceController");
 
 router.get("/workspace", getAllWorkspaces);
@@ -13,7 +13,7 @@ router.post("/workspace", createWorkspace);
 router.put("/workspace/:id", updateWorkspace);
 router.delete("/workspace/:id", deleteWorkspace);
 
-//  UPDATE workspace status 
+//  UPDATE workspace status
 router.patch("/workspace/:id/status", updateWorkspaceStatus);
 
 module.exports = router;

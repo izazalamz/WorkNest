@@ -15,17 +15,10 @@ const activeRoutes = require("./routes/activeRoutes");
 const taskRoutes = require("./routes/taskRoutes");
 const chatRoutes = require("./routes/chatRoutes");
 const guestRoutes = require("./routes/guestRoutes"); // NEW: Guest routes
-const { expireBookings, timeoutBookings } = require("./controllers/bookingController");
-
-// Debug: Check which routes are undefined
-console.log(" Debug - Route Types:");
-console.log("userRoutes:", typeof userRoutes);
-console.log("workspaceRoutes:", typeof workspaceRoutes);
-console.log("analyticsRoutes:", typeof analyticsRoutes);
-console.log("notificationRoutes:", typeof notificationRoutes);
-console.log("attendanceRoutes:", typeof attendanceRoutes);
-console.log("activeRoutes:", typeof activeRoutes);
-console.log("guestRoutes:", typeof guestRoutes); // Debug guest routes
+const {
+  expireBookings,
+  timeoutBookings,
+} = require("./controllers/bookingController");
 
 const PORT = process.env.PORT || 3000;
 
@@ -63,9 +56,9 @@ app.use(express.urlencoded({ limit: "50mb", extended: true }));
 
 // Request logging middleware - Log ALL requests
 app.use((req, res, next) => {
-  console.log(
-    `\n [${new Date().toLocaleTimeString()}] ${req.method} ${req.path}`
-  );
+  // console.log(
+  //   `\n [${new Date().toLocaleTimeString()}] ${req.method} ${req.path}`
+  // );
   if (req.body && Object.keys(req.body).length > 0) {
     console.log("Body:", JSON.stringify(req.body, null, 2));
   }
@@ -75,7 +68,7 @@ app.use((req, res, next) => {
 // all routes for users
 app.use(userRoutes);
 
-// ===== MONGODB ROUTES (Custom Backend) =====
+// MONGODB ROUTES (Custom Backend)
 app.use("/api", attendanceRoutes);
 app.use("/api/notifications", notificationRoutes);
 app.use("/api/guest", guestRoutes); // Guest routes
@@ -93,7 +86,7 @@ app.use("/dashboard", taskRoutes);
 
 // 404 handler
 app.use((req, res) => {
-  console.log(` 404 - Route not found: ${req.method} ${req.path}`);
+  // console.log(` 404 - Route not found: ${req.method} ${req.path}`);
   res.status(404).json({
     success: false,
     message: `Route not found: ${req.method} ${req.path}`,
@@ -102,7 +95,7 @@ app.use((req, res) => {
 
 // Error handling middleware
 app.use((err, req, res, next) => {
-  console.error("Server Error:", err.message);
+  // console.error("Server Error:", err.message);
   console.error(err);
   res.status(500).json({
     success: false,
@@ -120,11 +113,11 @@ app.use(jsonRouter);
 // Start server with Socket.IO
 server.listen(PORT, () => {
   console.log(`\n Unified Server + Socket.IO running on port ${PORT}`);
-  console.log(` MongoDB Backend: /api/attendance/*`);
-  console.log(` Guest Mode API: /api/guest/*`); // NEW: Log guest routes
-  console.log(` JSON Server: /users, /bookings, etc.`);
-  console.log(` CORS enabled for http://localhost:5173`);
-  console.log(` Check health: http://localhost:${PORT}/health\n`);
+  // console.log(` MongoDB Backend: /api/attendance/*`);
+  // console.log(` Guest Mode API: /api/guest/*`); // NEW: Log guest routes
+  // console.log(` JSON Server: /users, /bookings, etc.`);
+  // console.log(` CORS enabled for http://localhost:5173`);
+  // console.log(` Check health: http://localhost:${PORT}/health\n`);
 });
 
 // Set up scheduled tasks for booking management
@@ -142,8 +135,8 @@ setInterval(async () => {
   try {
     await expireBookings();
   } catch (err) {
-    console.error("Error in expire bookings interval:", err);
+    // console.error("Error in expire bookings interval:", err);
   }
 }, 5 * 60 * 1000); // Every 5 minutes
 
-console.log("✅ Booking timeout and expiration checks scheduled");
+// console.log(" Booking timeout and expiration checks scheduled");

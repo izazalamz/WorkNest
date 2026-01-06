@@ -2,14 +2,14 @@ const Booking = require("../models/bookingModel");
 const Workspace = require("../models/workspaceModel");
 const User = require("../models/userModel");
 
-/* =========================================================
+/* ==
    CREATE BOOKING
-========================================================= */
+== */
 const createBooking = async (req, res) => {
   try {
     const { workspaceId, startAt, endAt, googleEventId, uid } = req.body;
 
-    // 1️⃣ Get user by UID (from frontend) or find first user as fallback
+    //  Get user by UID (from frontend) or find first user as fallback
     let user;
     if (uid) {
       user = await User.findOne({ uid });
@@ -17,22 +17,22 @@ const createBooking = async (req, res) => {
       // Fallback: get first user (temporary – should use auth middleware)
       user = await User.findOne();
     }
-    
+
     if (!user) {
       return res.status(400).json({ message: "No user found in DB" });
     }
 
-    // 2️⃣ Fetch workspace
+    // Fetch workspace
     const workspace = await Workspace.findById(workspaceId);
     if (!workspace) {
       return res.status(404).json({ message: "Workspace not found" });
     }
-    
+
     if (workspace.status !== "active") {
       return res.status(400).json({ message: "Workspace is not available" });
     }
 
-    // 2.5️⃣ Check for overlapping bookings (prevent double booking)
+    // Check for overlapping bookings (prevent double booking)
     const overlappingBooking = await Booking.findOne({
       workspaceId,
       status: { $in: ["confirmed", "checked_in"] },
@@ -50,7 +50,7 @@ const createBooking = async (req, res) => {
       });
     }
 
-    // 3️⃣ Create booking (with optional Google Calendar integration)
+    // Create booking (with optional Google Calendar integration)
     const bookingData = {
       userId: user._id,
       workspaceId,
@@ -71,7 +71,7 @@ const createBooking = async (req, res) => {
 
     const booking = await Booking.create(bookingData);
 
-    // 4️⃣ Update workspace status
+    // Update workspace status
     workspace.status = "inactive";
     workspace.startAt = startAt;
     workspace.endAt = endAt;
@@ -84,15 +84,15 @@ const createBooking = async (req, res) => {
   }
 };
 
-/* =========================================================
-   GET MY BOOKINGS (FROM BOOKINGS COLLECTION ✅)
+/* ==
+   GET MY BOOKINGS (FROM BOOKINGS COLLECTION )
    Module 4, Requirement 4: Show all past/upcoming desk and meeting bookings per user
-========================================================= */
+== */
 const getMyBookings = async (req, res) => {
   try {
     // Get user UID from query parameter or request body
     const uid = req.query?.uid || req.body?.uid;
-    
+
     if (!uid) {
       return res.status(400).json({ message: "User UID is required" });
     }
@@ -113,7 +113,9 @@ const getMyBookings = async (req, res) => {
       })
       .sort({ startAt: -1 });
 
-    console.log(`Found ${allBookings.length} total bookings for user ${user.uid}`);
+    console.log(
+      `Found ${allBookings.length} total bookings for user ${user.uid}`
+    );
 
     // Separate bookings into past and upcoming based on current time
     const now = new Date();
@@ -126,13 +128,13 @@ const getMyBookings = async (req, res) => {
       // 2. It's been cancelled, OR
       // 3. It's been checked in, OR
       // 4. It's been marked as no_show or expired
-      const isPast = 
+      const isPast =
         new Date(booking.endAt) < now ||
         booking.status === "cancelled" ||
         booking.status === "checked_in" ||
         booking.status === "no_show" ||
         booking.status === "expired";
-      
+
       if (isPast) {
         pastBookings.push(booking);
       } else {
@@ -140,19 +142,21 @@ const getMyBookings = async (req, res) => {
       }
     });
 
-    console.log(`Past bookings: ${pastBookings.length}, Upcoming bookings: ${upcomingBookings.length}`);
+    console.log(
+      `Past bookings: ${pastBookings.length}, Upcoming bookings: ${upcomingBookings.length}`
+    );
 
     // Sort upcoming bookings by startAt (ascending - soonest first)
     upcomingBookings.sort((a, b) => new Date(a.startAt) - new Date(b.startAt));
-    
+
     // Sort past bookings by startAt (descending - most recent first)
     pastBookings.sort((a, b) => new Date(b.startAt) - new Date(a.startAt));
 
-    res.status(200).json({ 
-      success: true, 
+    res.status(200).json({
+      success: true,
       pastBookings,
       upcomingBookings,
-      totalBookings: allBookings.length
+      totalBookings: allBookings.length,
     });
   } catch (err) {
     console.error(err);
@@ -160,9 +164,9 @@ const getMyBookings = async (req, res) => {
   }
 };
 
-/* =========================================================
+/* ==
    CHECK-IN BOOKING
-========================================================= */
+== */
 const checkInBooking = async (req, res) => {
   try {
     const { bookingId } = req.params;
@@ -179,7 +183,9 @@ const checkInBooking = async (req, res) => {
 
     // Check if booking is still valid (not cancelled, expired, or no_show)
     if (booking.status !== "confirmed") {
-      return res.status(400).json({ message: "Cannot check in to this booking" });
+      return res
+        .status(400)
+        .json({ message: "Cannot check in to this booking" });
     }
 
     // Update booking with check-in time and status
@@ -197,9 +203,9 @@ const checkInBooking = async (req, res) => {
   }
 };
 
-/* =========================================================
+/* ==
    CANCEL BOOKING
-========================================================= */
+== */
 const cancelBooking = async (req, res) => {
   try {
     const { bookingId } = req.params;
@@ -244,10 +250,10 @@ const cancelBooking = async (req, res) => {
   }
 };
 
-/* =========================================================
+/* ==
    AUTO EXPIRE BOOKINGS (SAFE)
    Frees workspace after endAt if booking still confirmed
-========================================================= */
+== */
 const expireBookings = async () => {
   try {
     const now = new Date();
@@ -290,10 +296,10 @@ const expireBookings = async () => {
   }
 };
 
-/* =========================================================
+/* ==
    AUTO TIMEOUT BOOKINGS (15 MINUTE RULE)
    Releases bookings that haven't been checked in within 15 minutes of startAt
-========================================================= */
+== */
 const timeoutBookings = async () => {
   try {
     const now = new Date();
@@ -332,7 +338,9 @@ const timeoutBookings = async () => {
             startAt: null,
             endAt: null,
           });
-          console.log(`Booking ${booking._id} timed out (no check-in) and workspace released`);
+          console.log(
+            `Booking ${booking._id} timed out (no check-in) and workspace released`
+          );
         }
       } else {
         console.warn(
@@ -345,7 +353,7 @@ const timeoutBookings = async () => {
   }
 };
 
-// ⚠️ Export everything
+//  Export everything
 module.exports = {
   createBooking,
   getMyBookings,

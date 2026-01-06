@@ -1,5 +1,15 @@
 import { useState, useEffect } from "react";
-import { Users, Clock, CheckCircle, XCircle, RefreshCw, User, Building2, Home } from "lucide-react";
+import {
+  Users,
+  Clock,
+  CheckCircle,
+  XCircle,
+  RefreshCw,
+  User,
+  Building2,
+  Home,
+} from "lucide-react";
+import Loading from "../../components/Loading";
 
 export default function ShowActive() {
   const [activeUsers, setActiveUsers] = useState([]);
@@ -9,7 +19,7 @@ export default function ShowActive() {
 
   useEffect(() => {
     fetchActiveUsers();
-    
+
     const interval = setInterval(() => {
       fetchActiveUsers();
     }, 30000);
@@ -20,14 +30,16 @@ export default function ShowActive() {
   const fetchActiveUsers = async () => {
     try {
       setLoading(true);
-      const response = await fetch("http://localhost:3000/api/attendance/active-today");
-      
+      const response = await fetch(
+        "http://localhost:3000/api/attendance/active-today"
+      );
+
       if (!response.ok) {
         throw new Error("Failed to fetch attendance data");
       }
-      
+
       const data = await response.json();
-      
+
       if (data.success) {
         setActiveUsers(data.data);
         setLastUpdated(new Date());
@@ -43,9 +55,9 @@ export default function ShowActive() {
 
   const formatTime = (dateString) => {
     if (!dateString) return "-";
-    return new Date(dateString).toLocaleTimeString([], { 
-      hour: "2-digit", 
-      minute: "2-digit" 
+    return new Date(dateString).toLocaleTimeString([], {
+      hour: "2-digit",
+      minute: "2-digit",
     });
   };
 
@@ -56,17 +68,15 @@ export default function ShowActive() {
     return `${h}h ${m}m`;
   };
 
-  const activeCount = activeUsers.filter(u => u.isActive).length;
-  const checkedOutCount = activeUsers.filter(u => u.status === 'checked_out').length;
-  const officeCount = activeUsers.filter(u => u.workMode === 'office').length;
-  const remoteCount = activeUsers.filter(u => u.workMode === 'remote').length;
+  const activeCount = activeUsers.filter((u) => u.isActive).length;
+  const checkedOutCount = activeUsers.filter(
+    (u) => u.status === "checked_out"
+  ).length;
+  const officeCount = activeUsers.filter((u) => u.workMode === "office").length;
+  const remoteCount = activeUsers.filter((u) => u.workMode === "remote").length;
 
   if (loading && activeUsers.length === 0) {
-    return (
-      <div className="flex items-center justify-center h-64">
-        <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-600"></div>
-      </div>
-    );
+    return <Loading />;
   }
 
   return (
@@ -77,16 +87,18 @@ export default function ShowActive() {
           <Users className="w-8 h-8 text-blue-600" />
           <div>
             <h1 className="text-2xl font-bold text-gray-900">Active Status</h1>
-            <p className="text-gray-600">Monitor today's attendance in real-time</p>
+            <p className="text-gray-600">
+              Monitor today's attendance in real-time
+            </p>
           </div>
         </div>
-        
+
         <button
           onClick={fetchActiveUsers}
           disabled={loading}
           className="flex items-center gap-2 px-4 py-2 bg-blue-600 hover:bg-blue-700 disabled:bg-gray-400 text-white rounded-lg transition"
         >
-          <RefreshCw className={`w-4 h-4 ${loading ? 'animate-spin' : ''}`} />
+          <RefreshCw className={`w-4 h-4 ${loading ? "animate-spin" : ""}`} />
           Refresh
         </button>
       </div>
@@ -112,7 +124,9 @@ export default function ShowActive() {
             </div>
             <div>
               <p className="text-sm text-gray-600">Checked Out</p>
-              <p className="text-2xl font-bold text-gray-900">{checkedOutCount}</p>
+              <p className="text-2xl font-bold text-gray-900">
+                {checkedOutCount}
+              </p>
             </div>
           </div>
         </div>
@@ -158,19 +172,33 @@ export default function ShowActive() {
       {/* Active Users List */}
       <div className="bg-white border border-gray-200 rounded-lg overflow-hidden">
         <div className="px-6 py-4 border-b border-gray-200 bg-gray-50">
-          <h2 className="text-lg font-semibold text-gray-900">Today's Attendance</h2>
+          <h2 className="text-lg font-semibold text-gray-900">
+            Today's Attendance
+          </h2>
         </div>
 
         <div className="overflow-x-auto">
           <table className="w-full">
             <thead className="bg-gray-50 border-b border-gray-200">
               <tr>
-                <th className="text-left py-3 px-6 font-medium text-gray-700">Employee</th>
-                <th className="text-left py-3 px-6 font-medium text-gray-700">Status</th>
-                <th className="text-left py-3 px-6 font-medium text-gray-700">Work Mode</th>
-                <th className="text-left py-3 px-6 font-medium text-gray-700">Check-in</th>
-                <th className="text-left py-3 px-6 font-medium text-gray-700">Check-out</th>
-                <th className="text-left py-3 px-6 font-medium text-gray-700">Active Time</th>
+                <th className="text-left py-3 px-6 font-medium text-gray-700">
+                  Employee
+                </th>
+                <th className="text-left py-3 px-6 font-medium text-gray-700">
+                  Status
+                </th>
+                <th className="text-left py-3 px-6 font-medium text-gray-700">
+                  Work Mode
+                </th>
+                <th className="text-left py-3 px-6 font-medium text-gray-700">
+                  Check-in
+                </th>
+                <th className="text-left py-3 px-6 font-medium text-gray-700">
+                  Check-out
+                </th>
+                <th className="text-left py-3 px-6 font-medium text-gray-700">
+                  Active Time
+                </th>
               </tr>
             </thead>
             <tbody>
@@ -183,10 +211,10 @@ export default function ShowActive() {
                 </tr>
               ) : (
                 activeUsers.map((user, index) => (
-                  <tr 
-                    key={user.employeeId} 
+                  <tr
+                    key={user.employeeId}
                     className={`border-b border-gray-100 hover:bg-gray-50 transition ${
-                      index % 2 === 0 ? 'bg-white' : 'bg-gray-50'
+                      index % 2 === 0 ? "bg-white" : "bg-gray-50"
                     }`}
                   >
                     <td className="py-4 px-6">
@@ -195,8 +223,12 @@ export default function ShowActive() {
                           <User className="w-5 h-5 text-blue-600" />
                         </div>
                         <div>
-                          <p className="font-medium text-gray-900">{user.employeeName}</p>
-                          <p className="text-sm text-gray-500">{user.employeeId}</p>
+                          <p className="font-medium text-gray-900">
+                            {user.employeeName}
+                          </p>
+                          <p className="text-sm text-gray-500">
+                            {user.employeeId}
+                          </p>
                         </div>
                       </div>
                     </td>
@@ -206,7 +238,7 @@ export default function ShowActive() {
                           <CheckCircle className="w-4 h-4" />
                           Active
                         </span>
-                      ) : user.status === 'checked_out' ? (
+                      ) : user.status === "checked_out" ? (
                         <span className="inline-flex items-center gap-1 px-3 py-1 bg-orange-100 text-orange-700 rounded-full text-sm font-medium">
                           <XCircle className="w-4 h-4" />
                           Checked Out
@@ -218,12 +250,12 @@ export default function ShowActive() {
                       )}
                     </td>
                     <td className="py-4 px-6">
-                      {user.workMode === 'office' ? (
+                      {user.workMode === "office" ? (
                         <span className="inline-flex items-center gap-1 px-3 py-1 bg-blue-100 text-blue-700 rounded-full text-sm font-medium">
                           <Building2 className="w-4 h-4" />
                           Office
                         </span>
-                      ) : user.workMode === 'remote' ? (
+                      ) : user.workMode === "remote" ? (
                         <span className="inline-flex items-center gap-1 px-3 py-1 bg-purple-100 text-purple-700 rounded-full text-sm font-medium">
                           <Home className="w-4 h-4" />
                           Remote

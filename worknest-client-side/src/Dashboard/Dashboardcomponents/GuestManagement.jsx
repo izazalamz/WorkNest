@@ -14,6 +14,7 @@ import {
 import axios from "axios";
 import { AuthContext } from "../../contexts/AuthContext";
 import { toast } from "react-toastify";
+import Loading from "../../components/Loading";
 
 const GuestManagement = () => {
   const { user } = use(AuthContext);
@@ -51,7 +52,9 @@ const GuestManagement = () => {
 
   // Approve guest
   const handleApprove = async (guestId) => {
-    if (!window.confirm("Are you sure you want to approve this guest request?")) {
+    if (
+      !window.confirm("Are you sure you want to approve this guest request?")
+    ) {
       return;
     }
 
@@ -113,17 +116,35 @@ const GuestManagement = () => {
   // Get status badge
   const getStatusBadge = (status) => {
     const badges = {
-      pending: { color: "bg-yellow-100 text-yellow-700", icon: Clock, label: "Pending" },
-      approved: { color: "bg-green-100 text-green-700", icon: CheckCircle, label: "Approved" },
-      rejected: { color: "bg-red-100 text-red-700", icon: XCircle, label: "Rejected" },
-      checked_in: { color: "bg-blue-100 text-blue-700", icon: CheckCircle, label: "Active" },
+      pending: {
+        color: "bg-yellow-100 text-yellow-700",
+        icon: Clock,
+        label: "Pending",
+      },
+      approved: {
+        color: "bg-green-100 text-green-700",
+        icon: CheckCircle,
+        label: "Approved",
+      },
+      rejected: {
+        color: "bg-red-100 text-red-700",
+        icon: XCircle,
+        label: "Rejected",
+      },
+      checked_in: {
+        color: "bg-blue-100 text-blue-700",
+        icon: CheckCircle,
+        label: "Active",
+      },
     };
 
     const badge = badges[status] || badges.pending;
     const Icon = badge.icon;
 
     return (
-      <span className={`inline-flex items-center gap-1 px-2 py-1 rounded text-xs font-medium ${badge.color}`}>
+      <span
+        className={`inline-flex items-center gap-1 px-2 py-1 rounded text-xs font-medium ${badge.color}`}
+      >
         <Icon className="w-3 h-3" />
         {badge.label}
       </span>
@@ -212,10 +233,7 @@ const GuestManagement = () => {
       {/* Guest List */}
       <div className="bg-card border border-border rounded-xl overflow-hidden">
         {loading ? (
-          <div className="p-8 text-center">
-            <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-primary mx-auto"></div>
-            <p className="text-muted-foreground mt-4">Loading guest requests...</p>
-          </div>
+          <Loading />
         ) : filteredGuests.length === 0 ? (
           <div className="p-8 text-center">
             <Users className="w-12 h-12 text-muted-foreground mx-auto mb-3" />
@@ -248,7 +266,9 @@ const GuestManagement = () => {
                   <tr key={guest._id} className="hover:bg-muted/50">
                     <td className="px-6 py-4">
                       <div>
-                        <p className="font-medium text-foreground">{guest.fullName}</p>
+                        <p className="font-medium text-foreground">
+                          {guest.fullName}
+                        </p>
                         {guest.company && (
                           <p className="text-sm text-muted-foreground flex items-center gap-1">
                             <Building2 className="w-3 h-3" />
@@ -271,7 +291,9 @@ const GuestManagement = () => {
                         )}
                       </div>
                     </td>
-                    <td className="px-6 py-4">{getStatusBadge(guest.status)}</td>
+                    <td className="px-6 py-4">
+                      {getStatusBadge(guest.status)}
+                    </td>
                     <td className="px-6 py-4">
                       <p className="text-sm text-muted-foreground flex items-center gap-1">
                         <Calendar className="w-3 h-3" />
@@ -297,7 +319,9 @@ const GuestManagement = () => {
                           </button>
                         </div>
                       ) : (
-                        <span className="text-sm text-muted-foreground">No actions</span>
+                        <span className="text-sm text-muted-foreground">
+                          No actions
+                        </span>
                       )}
                     </td>
                   </tr>

@@ -5,9 +5,9 @@ let User = null;
 try {
   User = require("../models/User");
 } catch (error) {
-  console.log(
-    "Note: User model not found. Active status will show basic employee info only."
-  );
+  // console.log(
+  //   "Note: User model not found. Active status will show basic employee info only."
+  // );
 }
 
 // Get today's active users
@@ -135,7 +135,7 @@ const checkIn = async (req, res) => {
     });
 
     if (existingCheckIn) {
-      console.log("⚠️ Already checked in today:", existingCheckIn);
+      console.log(" Already checked in today:", existingCheckIn);
       return res.status(200).json({
         success: true,
         message: "Already checked in today",
@@ -155,7 +155,7 @@ const checkIn = async (req, res) => {
 
     await attendance.save();
 
-    console.log("✅ Check-in successful:", attendance);
+    console.log(" Check-in successful:", attendance);
     return res.status(201).json({
       success: true,
       message: "Check-in successful",
@@ -168,7 +168,7 @@ const checkIn = async (req, res) => {
     console.error("Error message:", err.message);
 
     if (err.code === 11000) {
-      console.log("⚠️ Duplicate key error → Fetching existing record");
+      console.log(" Duplicate key error → Fetching existing record");
 
       try {
         const day = new Date();
@@ -180,7 +180,7 @@ const checkIn = async (req, res) => {
         });
 
         if (existingRecord) {
-          console.log("✅ Found existing record:", existingRecord);
+          console.log(" Found existing record:", existingRecord);
           return res.status(200).json({
             success: true,
             message: "Already checked in today",
@@ -250,7 +250,7 @@ const checkOut = async (req, res) => {
     }
 
     if (attendance.checkOutTime) {
-      console.log("⚠️ Already checked out:", attendance);
+      console.log(" Already checked out:", attendance);
       return res.status(200).json({
         success: true,
         message: "Already checked out",
@@ -264,7 +264,7 @@ const checkOut = async (req, res) => {
 
     await attendance.save();
 
-    console.log("✅ Check-out successful:", attendance);
+    console.log(" Check-out successful:", attendance);
     return res.status(200).json({
       success: true,
       message: "Check-out successful",
@@ -300,7 +300,7 @@ const getAttendance = async (req, res) => {
       .sort({ date: -1 })
       .lean();
 
-    console.log(`✅ Found ${attendance.length} attendance records`);
+    console.log(` Found ${attendance.length} attendance records`);
 
     return res.status(200).json({
       success: true,
