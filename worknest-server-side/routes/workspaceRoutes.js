@@ -13,7 +13,7 @@ router.post("/workspace", createWorkspace);
 router.put("/workspace/:id", updateWorkspace);
 router.delete("/workspace/:id", deleteWorkspace);
 
-// 🔹 UPDATE workspace status 
-router.patch("/workspaces/:id", updateWorkspaceStatus);
+//  UPDATE workspace status 
+router.patch("/workspace/:id/status", updateWorkspaceStatus);
 
 module.exports = router;

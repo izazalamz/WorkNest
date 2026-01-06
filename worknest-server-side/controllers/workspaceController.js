@@ -6,7 +6,7 @@ const createWorkspace = async (req, res) => {
     const {
       name,
       type,
-      location, 
+      location, // { building, floor, zone, description }
       capacity,
       amenities,
       status,
@@ -57,6 +57,105 @@ const getAllWorkspaces = async (req, res) => {
   } catch (error) {
     console.log(error);
     res.status(500).json({ message: "Failed to fetch workspaces" });
+  }
+};
+
+// ✅ Update workspace (general update for name, type, location, capacity, amenities)
+const updateWorkspace = async (req, res) => {
+  try {
+    const { id } = req.params;
+    const {
+      name,
+      type,
+      location,
+      capacity,
+      amenities,
+      status,
+    } = req.body;
+
+    // Build update object with only provided fields
+    const updateData = {};
+    if (name !== undefined) updateData.name = name;
+    if (type !== undefined) updateData.type = type;
+    if (location !== undefined) {
+      updateData.location = {
+        building: location?.building,
+        floor: location?.floor,
+        zone: location?.zone,
+        description: location?.description,
+      };
+    }
+    if (capacity !== undefined) updateData.capacity = capacity;
+    if (amenities !== undefined) updateData.amenities = amenities;
+    if (status !== undefined) updateData.status = status;
+
+    const updatedWorkspace = await Workspace.findByIdAndUpdate(
+      id,
+      updateData,
+      { new: true, runValidators: true }
+    );
+
+    if (!updatedWorkspace) {
+      return res.status(404).json({
+        success: false,
+        message: "Workspace not found",
+      });
+    }
+
+    res.status(200).json({
+      success: true,
+      workspace: updatedWorkspace,
+    });
+  } catch (error) {
+    console.error("Update workspace error:", error);
+    res.status(500).json({
+      success: false,
+      message: "Failed to update workspace",
+      error: error.message,
+    });
+  }
+};
+
+// ✅ Delete workspace
+const deleteWorkspace = async (req, res) => {
+  try {
+    const { id } = req.params;
+
+    // Check if workspace has active bookings
+    const Booking = require("../models/bookingModel");
+    const activeBookings = await Booking.countDocuments({
+      workspaceId: id,
+      status: { $in: ["confirmed", "checked_in"] },
+    });
+
+    if (activeBookings > 0) {
+      return res.status(400).json({
+        success: false,
+        message: `Cannot delete workspace. It has ${activeBookings} active booking(s). Please cancel or complete all bookings first.`,
+      });
+    }
+
+    const deletedWorkspace = await Workspace.findByIdAndDelete(id);
+
+    if (!deletedWorkspace) {
+      return res.status(404).json({
+        success: false,
+        message: "Workspace not found",
+      });
+    }
+
+    res.status(200).json({
+      success: true,
+      message: "Workspace deleted successfully",
+      workspace: deletedWorkspace,
+    });
+  } catch (error) {
+    console.error("Delete workspace error:", error);
+    res.status(500).json({
+      success: false,
+      message: "Failed to delete workspace",
+      error: error.message,
+    });
   }
 };
 

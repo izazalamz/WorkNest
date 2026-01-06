@@ -7,6 +7,7 @@ const { Server } = require("socket.io");
 const socketHandler = require("./socket/socket");
 const userRoutes = require("./routes/userRoutes");
 const workspaceRoutes = require("./routes/workspaceRoutes");
+const bookingRoutes = require("./routes/bookingRoute");
 const analyticsRoutes = require("./routes/analyticsRoutes");
 const notificationRoutes = require("./routes/notificationRoutes");
 const attendanceRoutes = require("./routes/attendanceRoutes");
@@ -14,6 +15,7 @@ const activeRoutes = require("./routes/activeRoutes");
 const taskRoutes = require("./routes/taskRoutes");
 const chatRoutes = require("./routes/chatRoutes");
 const guestRoutes = require("./routes/guestRoutes"); // NEW: Guest routes
+const { expireBookings, timeoutBookings } = require("./controllers/bookingController");
 
 // Debug: Check which routes are undefined
 console.log(" Debug - Route Types:");
@@ -28,7 +30,6 @@ console.log("guestRoutes:", typeof guestRoutes); // Debug guest routes
 const PORT = process.env.PORT || 3000;
 
 const app = express();
-const server = http.createServer(app);
 
 // Create HTTP server FIRST
 const server = http.createServer(app);
@@ -78,6 +79,7 @@ app.use(userRoutes);
 app.use("/api", attendanceRoutes);
 app.use("/api/notifications", notificationRoutes);
 app.use("/api/guest", guestRoutes); // Guest routes
+app.use("/api/bookings", bookingRoutes); // Booking routes
 
 // OTHER ROUTES
 app.use(userRoutes);
@@ -124,3 +126,24 @@ server.listen(PORT, () => {
   console.log(` CORS enabled for http://localhost:5173`);
   console.log(` Check health: http://localhost:${PORT}/health\n`);
 });
+
+// Set up scheduled tasks for booking management
+// Run timeout check every minute (for 15-minute no-show rule)
+setInterval(async () => {
+  try {
+    await timeoutBookings();
+  } catch (err) {
+    console.error("Error in timeout bookings interval:", err);
+  }
+}, 60 * 1000); // Every minute
+
+// Run expire check every 5 minutes (for bookings past endAt)
+setInterval(async () => {
+  try {
+    await expireBookings();
+  } catch (err) {
+    console.error("Error in expire bookings interval:", err);
+  }
+}, 5 * 60 * 1000); // Every 5 minutes
+
+console.log("✅ Booking timeout and expiration checks scheduled");

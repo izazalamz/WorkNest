@@ -1,13 +1,13 @@
-import { useEffect, useState, use } from "react";
+import { useEffect, useState, useContext } from "react";
 import {
-  Sun,
-  CloudRain,
-  Cloud,
   MapPin,
   Calendar,
   Users,
   Building2,
   ArrowRight,
+  Clock,
+  Eye,
+  Edit,
 } from "lucide-react";
 import axios from "axios";
 import { Link } from "react-router";
@@ -17,13 +17,55 @@ import Loading from "../components/Loading";
 import WeatherWidget from "./Dashboardcomponents/WeatherWidget";
 
 const DashboardHome = () => {
-  const { user } = use(AuthContext);
+  // ✅ FIX: useContext instead of experimental use()
+  const { user } = useContext(AuthContext);
+
   const { role } = useUserRole();
   const [userData, setUserData] = useState(null);
-  const [weather, setWeather] = useState(null);
   const [loading, setLoading] = useState(true);
 
   const uid = user?.uid;
+
+  // ✅ FIX: quickActions was missing (runtime crash)
+  const quickActions = [
+    {
+      title: "Book a Desk",
+      description: "Reserve a workspace for your day",
+      path: "/dashboard/desk-booking",
+      icon: MapPin,
+      color: "primary",
+      available: true,
+    },
+    {
+      title: "Book a Meeting Room",
+      description: "Schedule meetings with ease",
+      path: "/dashboard/meeting-rooms",
+      icon: Calendar,
+      color: "primary",
+      available: true,
+    },
+    {
+      title: "Manage Workspaces",
+      description: "Add or edit desks and rooms",
+      path: "/dashboard/workspace",
+      icon: Building2,
+      color: "primary",
+      available: role === "admin",
+    },
+    {
+      title: "Manage Users",
+      description: "Control roles and access",
+      path: "/dashboard/all-users",
+      icon: Users,
+      color: "primary",
+      available: role === "admin",
+    },
+  ];
+
+  // ✅ FIX: Tailwind can't compile dynamic classes like bg-${action.color}/10
+  const colorStyles = {
+    primary: "bg-primary/10 text-primary",
+  };
 
   // greeting
   const hour = new Date().getHours();
@@ -35,15 +77,11 @@ const DashboardHome = () => {
 
     const fetchData = async () => {
       try {
-        const userRes = await axios.get(`http://localhost:3000/users/${uid}`);
-        setUserData(userRes.data.user);
+        const userRes = await axios.get(
+          `http://localhost:3000/users/${uid}`
+        );
 
-        // MOCK weather (replace with OpenWeatherMap later)
-        const mockWeather = {
-          condition: "good", // good | bad | cloudy
-          temp: 26,
-        };
-        setWeather(mockWeather);
+        setUserData(userRes.data.user);
       } catch (err) {
         console.error(err);
       } finally {
@@ -55,21 +93,6 @@ const DashboardHome = () => {
   }, [uid]);
 
   if (loading || !userData) return <Loading />;
-
-  // Weather message logic
-  const weatherMessage =
-    weather.condition === "good"
-      ? "☀️ Perfect weather! Great day to work from the office."
-      : weather.condition === "bad"
-      ? "🌧 Weather looks rough. Working from home might be better today."
-      : "☁️ Mild weather today. Choose what works best for you.";
-
-  const WeatherIcon =
-    weather.condition === "good"
-      ? Sun
-      : weather.condition === "bad"
-      ? CloudRain
-      : Cloud;
 
   return (
     <div className="space-y-8">
@@ -96,6 +119,7 @@ const DashboardHome = () => {
             <h2 className="text-xl font-semibold text-foreground mb-6">
               Quick Actions
             </h2>
+
             <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
               {quickActions
                 .filter((action) => action.available)
@@ -107,12 +131,15 @@ const DashboardHome = () => {
                   >
                     <div className="flex items-center justify-between mb-3">
                       <div
-                        className={`p-3 rounded-lg bg-${action.color}/10 text-${action.color}`}
+                        className={`p-3 rounded-lg ${
+                          colorStyles[action.color] || colorStyles.primary
+                        }`}
                       >
                         <action.icon className="w-6 h-6" />
                       </div>
                       <ArrowRight className="w-5 h-5 text-muted-foreground group-hover:text-primary group-hover:translate-x-1 transition-all" />
                     </div>
+
                     <h3 className="font-semibold text-foreground group-hover:text-primary transition-colors">
                       {action.title}
                     </h3>
@@ -138,7 +165,7 @@ const DashboardHome = () => {
               </Link>
             </div>
 
-            {/* {userData.upcomingBooking ? (
+            {userData.upcomingBooking ? (
               <div className="p-4 bg-gradient-to-r from-primary/5 to-primary/10 border border-primary/20 rounded-lg">
                 <div className="flex items-center justify-between mb-3">
                   <div className="flex items-center gap-3">
@@ -192,68 +219,63 @@ const DashboardHome = () => {
                   <ArrowRight className="w-4 h-4" />
                 </Link>
               </div>
-            )} */}
+            )}
           </div>
-      {/* Weather Card */}
-      {/* <div className="bg-card border border-border rounded-xl p-6 flex items-center gap-4">
-        <div className="p-3 rounded-lg bg-primary/10">
-          <WeatherIcon className="w-6 h-6 text-primary" />
         </div>
-        <div>
-          <p className="text-sm text-muted-foreground">
-            Today’s Weather · {weather.temp}°C
-          </p>
-          <p className="font-medium text-foreground">{weatherMessage}</p>
-        </div>
-      </div> */}
-      <WeatherWidget />
 
-      {/* Stats */}
-      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
-        <StatCard icon={MapPin} label="Available Desks" value="—" />
-        <StatCard icon={Calendar} label="Your Bookings" value="—" />
-        <StatCard icon={Users} label="Team in Office" value="—" />
-        <StatCard icon={Building2} label="Meeting Rooms" value="—" />
-      </div>
+        {/* Right Column */}
+        <div className="space-y-8">
+          {/* Weather Widget - Bigger version */}
+          <WeatherWidget />
 
-      {/* Quick Actions */}
-      <div className="bg-card border border-border rounded-xl p-6">
-        <h2 className="text-xl font-semibold text-foreground mb-6">
-          Quick Actions
-        </h2>
+          {/* Stats */}
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-2 gap-6">
+            <StatCard icon={MapPin} label="Available Desks" value="—" />
+            <StatCard icon={Calendar} label="Your Bookings" value="—" />
+            <StatCard icon={Users} label="Team in Office" value="—" />
+            <StatCard icon={Building2} label="Meeting Rooms" value="—" />
+          </div>
 
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-          <QuickAction
-            to="/dashboard/desk-booking"
-            title="Book a Desk"
-            description="Reserve a workspace for your day"
-            icon={MapPin}
-          />
+          {/* Quick Actions (your second block kept as-is, but now correctly nested) */}
+          <div className="bg-card border border-border rounded-xl p-6">
+            <h2 className="text-xl font-semibold text-foreground mb-6">
+              Quick Actions
+            </h2>
 
-          <QuickAction
-            to="/dashboard/meeting-rooms"
-            title="Book a Meeting Room"
-            description="Schedule meetings with ease"
-            icon={Calendar}
-          />
-
-          {role === "admin" && (
-            <>
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
               <QuickAction
-                to="/dashboard/workspace"
-                title="Manage Workspaces"
-                description="Add or edit desks and rooms"
-                icon={Building2}
+                to="/dashboard/desk-booking"
+                title="Book a Desk"
+                description="Reserve a workspace for your day"
+                icon={MapPin}
               />
 
               <QuickAction
-                to="/dashboard/all-users"
-                title="Manage Users"
-                description="Control roles and access"
-                icon={Users}
+                to="/dashboard/meeting-rooms"
+                title="Book a Meeting Room"
+                description="Schedule meetings with ease"
+                icon={Calendar}
               />
-            </>
-          )}
+
+              {role === "admin" && (
+                <>
+                  <QuickAction
+                    to="/dashboard/workspace"
+                    title="Manage Workspaces"
+                    description="Add or edit desks and rooms"
+                    icon={Building2}
+                  />
+
+                  <QuickAction
+                    to="/dashboard/all-users"
+                    title="Manage Users"
+                    description="Control roles and access"
+                    icon={Users}
+                  />
+                </>
+              )}
+            </div>
+          </div>
         </div>
       </div>
     </div>
