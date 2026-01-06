@@ -30,7 +30,11 @@ const server = http.createServer(app);
 // NOW create Socket.IO with the server
 const io = new Server(server, {
   cors: {
-    origin: "http://localhost:5173", // frontend URL
+    origin: [
+      "http://localhost:5173",
+      "https://worknest-web.netlify.app",
+      "https://worknest-u174.onrender.com",
+    ],
     methods: ["GET", "POST"],
   },
 });
@@ -44,7 +48,13 @@ connectDB();
 // Middleware - CORS with proper configuration
 app.use(
   cors({
-    origin: ["http://localhost:5173", "http://localhost:3000", "*"],
+    origin: [
+      "http://localhost:5173",
+      "http://localhost:3000",
+      "https://worknest-web.netlify.app",
+      "https://worknest-u174.onrender.com",
+      "*",
+    ],
     credentials: true,
     methods: ["GET", "POST", "PUT", "DELETE", "PATCH", "OPTIONS"],
     allowedHeaders: ["Content-Type", "Authorization"],
@@ -63,6 +73,10 @@ app.use((req, res, next) => {
     console.log("Body:", JSON.stringify(req.body, null, 2));
   }
   next();
+});
+
+app.get("/", (req, res) => {
+  res.send("Worknest is Live now!");
 });
 
 // all routes for users
